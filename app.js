@@ -241,14 +241,14 @@ async function handlePaymentSubmit(e) {
 
         // 2. Build Transaction
         const transaction = new TransactionBuilder(sourceAccount, {
-            fee: await server.fetchBaseFee(),
+            fee: (await server.fetchBaseFee()).toString(),
             networkPassphrase: Networks.TESTNET,
         })
             .addOperation(
                 Operation.payment({
                     destination: receiver,
                     asset: Asset.native(),
-                    amount: amount,
+                    amount: amount.toString(),
                 })
             )
             .setTimeout(180) // 3 minute timeout
@@ -263,7 +263,11 @@ async function handlePaymentSubmit(e) {
 
         // 4. Submit to Network
         setBtnLoading(true, "Confirming...");
-        const result = await server.submitTransaction(signedXDR);
+        
+        // Convert the returned XDR string back into a Transaction object for the SDK v13
+        const signedTransaction = TransactionBuilder.fromXDR(signedXDR, Networks.TESTNET);
+        
+        const result = await server.submitTransaction(signedTransaction);
 
         showStatus(`
             <strong>Transaction Successful!</strong><br>
