@@ -4,80 +4,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellar Pay | White Belt Challenge</title>
-    <!-- Modern Styling -->
+    <title>OrbitPay | Stellar dApp</title>
+    <meta name="description" content="A premium Stellar payment dApp on the Testnet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts for professional typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
-    <div class="app-container">
-        <!-- Header Section -->
-        <header>
-            <h1 class="gradient-text">Stellar Pay</h1>
-            <p class="subtitle">Secure Testnet Payments made simple</p>
+    <div class="background-animation"></div>
+    <div class="container">
+        
+        <header class="app-header">
+            <div class="logo">
+                <span class="icon">🚀</span>
+                <h1>OrbitPay</h1>
+            </div>
+            <div class="network-badge">
+                <span class="pulse-dot"></span>
+                Stellar Testnet
+            </div>
         </header>
 
-        <!-- Wallet Section -->
-        <section id="wallet-section" class="card">
-            <div id="connection-prompt" class="centered-content">
-                <p>Connect your Freighter wallet to access the Stellar Testnet.</p>
-                <button id="connect-btn" class="btn btn-primary">Connect Wallet</button>
+        <main class="app-card">
+            
+            <section id="connection-prompt" class="card-section">
+                <div class="prompt-content">
+                    <h2>Welcome to the Future of Payments</h2>
+                    <p>Connect your Freighter wallet to instantly send and receive XLM on the Stellar Testnet with zero hassle.</p>
+                </div>
+                <button id="connect-btn" class="primary-btn pulse-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                    Connect Freighter Wallet
+                </button>
+            </section>
+
+            <section id="wallet-info" class="card-section hidden fade-in">
+                <div class="wallet-header">
+                    <h3>Wallet Connected</h3>
+                    <button id="disconnect-btn" class="secondary-btn small-btn">Disconnect</button>
+                </div>
+                <div class="address-box group">
+                    <span class="label">Public Key</span>
+                    <p id="wallet-address" class="address-text trunc" title="Click to copy">G...</p>
+                </div>
+            </section>
+
+            <section id="balance-section" class="card-section hidden fade-in delay-1">
+                <div class="balance-box interactive-box">
+                    <div class="balance-icon">💎</div>
+                    <div class="balance-details">
+                        <span class="label">Available Balance</span>
+                        <h2 class="balance-amount"><span id="wallet-balance">0.00</span> <span class="currency">XLM</span></h2>
+                    </div>
+                </div>
+            </section>
+
+            <section id="payment-section" class="card-section hidden fade-in delay-2">
+                <h3>Send Payment</h3>
+                <form id="payment-form" class="payment-form">
+                    <div class="input-group">
+                        <label for="receiver">Recipient Address</label>
+                        <input type="text" id="receiver" placeholder="Ex: GAXG..." required autocomplete="off" spellcheck="false">
+                        <div class="focus-border"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="amount">Amount (XLM)</label>
+                        <div class="amount-wrapper">
+                            <input type="number" id="amount" placeholder="0.00" step="0.0000001" min="0.0000001" required>
+                            <span class="currency-tag">XLM</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="send-btn" class="primary-btn submit-btn">
+                        <span>Send XLM</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </form>
+            </section>
+
+            <div id="status-box" class="status-message hidden mt-4">
+                <div id="status-content"></div>
             </div>
-
-            <div id="wallet-info" class="hidden">
-                <div class="info-row">
-                    <span class="label">Public Address</span>
-                    <span id="wallet-address" class="value">Not connected</span>
-                </div>
-                <div class="info-row status-connected">
-                    <span class="indicator"></span> Connected to Testnet
-                </div>
-                <button id="disconnect-btn" class="btn btn-outline small-btn">Disconnect Wallet</button>
-            </div>
-        </section>
-
-        <!-- Balance Section -->
-        <section id="balance-section" class="card hidden">
-            <h3>Account Balance</h3>
-            <div class="balance-display">
-                <span id="wallet-balance" class="xlm-value">0.00</span>
-                <span class="currency">XLM</span>
-            </div>
-            <p class="testnet-note">Funds on <strong>Stellar Testnet</strong></p>
-        </section>
-
-        <!-- Transaction Section -->
-        <section id="payment-section" class="card hidden">
-            <h3>Send XLM</h3>
-            <form id="payment-form">
-                <div class="input-group">
-                    <label for="receiver">Receiver Address</label>
-                    <input type="text" id="receiver" placeholder="G..." spellcheck="false" required>
-                </div>
-                <div class="input-group">
-                    <label for="amount">Amount (XLM)</label>
-                    <input type="number" id="amount" step="0.0000001" min="0.0000001" placeholder="0.0" required>
-                </div>
-                <button type="submit" id="send-btn" class="btn btn-primary full-width">Send XLM</button>
-            </form>
-        </section>
-
-        <!-- Feedback & Results Section -->
-        <div id="status-box" class="status-message hidden">
-            <div id="status-content"></div>
-        </div>
-
-        <footer>
+            
+        </main>
+        
+        <footer class="app-footer">
             <p>Built for the Stellar White Belt Challenge</p>
         </footer>
     </div>
 
-    <!-- Main Logic -->
+    <!-- Vite Inject -->
     <script type="module" src="app.js"></script>
 </body>
-
 </html>
