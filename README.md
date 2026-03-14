@@ -1,5 +1,6 @@
 # OrbitPay - Stellar Payment dApp
 
+## Project description
 OrbitPay is a professional, minimal, and fully functional decentralized application (dApp) built for the **Stellar White Belt Challenge**. It provides a seamless experience for users to interact with the Stellar Testnet using their Freighter wallet.
 
 ## 🚀 Features
@@ -17,13 +18,13 @@ OrbitPay is a professional, minimal, and fully functional decentralized applicat
 - **Network**: Stellar Testnet Horizon ([https://horizon-testnet.stellar.org](https://horizon-testnet.stellar.org))
 - **Build Tool**: Vite
 
-## 📦 Setup & Installation
+## Setup instructions (how to run locally)
 
 ### Prerequisites
 1. [Node.js](https://nodejs.org/) (v16+)
 2. [Freighter Wallet](https://www.freighter.app/) extension installed.
 
-### How to Run Locally
+### Execution Steps
 1. Clone the repository:
    ```bash
    git clone https://github.com/ShivamSoni20/OrbitPay.git
