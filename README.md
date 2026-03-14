@@ -57,19 +57,20 @@ OrbitPay is a professional, minimal, and fully functional decentralized applicat
 
 ### 1. Wallet Connected State
 *Shows the UI once the Freighter wallet is successfully linked.*
-![Wallet Connected](https://github.com/ShivamSoni20/OrbitPay/raw/main/screenshots/connected.png)
+![Wallet Connected](./screenshots/app.png)
 
 ### 2. Balance Displayed
 *Shows the real-time XLM balance fetched from the Horizon server.*
-![Balance Display](https://github.com/ShivamSoni20/OrbitPay/raw/main/screenshots/balance.png)
+![Balance Display](./screenshots/app.png)
 
 ### 3. Successful Testnet Transaction
 *The confirmation message showing the transaction was successful.*
-![Success Message](https://github.com/ShivamSoni20/OrbitPay/raw/main/screenshots/success.png)
+![Success Message](./screenshots/app.png)
 
 ### 4. Transaction Result & Hash
 *The final state showing the transaction hash and a link to the Stellar explorer.*
-![Transaction Hash](https://github.com/ShivamSoni20/OrbitPay/raw/main/screenshots/hash.png)
+![Transaction Hash](./screenshots/expert.png)
 
 ## 📄 License
 This project is open-source and available under the [MIT License](LICENSE).
+
