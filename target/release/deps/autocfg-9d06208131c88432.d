@@ -1,0 +1,10 @@
+D:\Gihtub Main\OrbitPay\stellar-payment-dapp\target\release\deps\autocfg-9d06208131c88432.d: C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\lib.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\error.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\rustc.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\version.rs
+
+D:\Gihtub Main\OrbitPay\stellar-payment-dapp\target\release\deps\libautocfg-9d06208131c88432.rlib: C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\lib.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\error.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\rustc.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\version.rs
+
+D:\Gihtub Main\OrbitPay\stellar-payment-dapp\target\release\deps\libautocfg-9d06208131c88432.rmeta: C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\lib.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\error.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\rustc.rs C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\version.rs
+
+C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\lib.rs:
+C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\error.rs:
+C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\rustc.rs:
+C:\Users\shivamsoni\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\autocfg-1.5.0\src\version.rs:

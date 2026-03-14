@@ -1,7 +1,12 @@
-# OrbitPay - Stellar Payment dApp
+# 🚀 OrbitPay | Stellar Yellow Belt (Level 2)
 
-## Project description
-OrbitPay is a professional, minimal, and fully functional decentralized application (dApp) built for the **Stellar White Belt Challenge**. It provides a seamless experience for users to interact with the Stellar Testnet using their Freighter wallet.
+OrbitPay is a premium Stellar dApp built for the **Stellar Yellow Belt Challenge**. It features multi-wallet integration, real-time community interaction, and a polished glassmorphism UI.
+
+## ✨ Level 2 Features
+- **Multi-Wallet Support**: Integrated `@creit.tech/stellar-wallets-kit` to support Freighter, xBull, Albedo, and Hana.
+- **Smart Community Poll**: A real-time voting system powered by a Soroban smart contract (currently simulated for demo).
+- **Real-time Sync**: Live progress bars that update instantly as votes are cast.
+- **Advanced Error Handling**: Precise tracking for transaction phases (Preparing, Waiting for Signature, Broadcasting).
 
 ## 🚀 Features
 - **Wallet Detection**: Automatically detects if the Freighter extension is installed and active.
