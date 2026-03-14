@@ -239,18 +239,35 @@ async function handlePaymentSubmit(e) {
         // 1. Fetch current sequence number
         const sourceAccount = await server.loadAccount(appState.userPublicKey);
 
+        // 1.5 Determine whether to use Payment or Create Account
+        let operation;
+        try {
+            // Check if account already exists
+            await server.loadAccount(receiver);
+            console.log("Account exists, using Payment operation.");
+            operation = Operation.payment({
+                destination: receiver,
+                asset: Asset.native(),
+                amount: amount.toString(),
+            });
+        } catch (err) {
+            if (err.response && err.response.status === 404) {
+                console.log("Account does not exist, using Create Account operation.");
+                operation = Operation.createAccount({
+                    destination: receiver,
+                    startingBalance: amount.toString(),
+                });
+            } else {
+                throw err;
+            }
+        }
+
         // 2. Build Transaction
         const transaction = new TransactionBuilder(sourceAccount, {
             fee: (await server.fetchBaseFee()).toString(),
             networkPassphrase: Networks.TESTNET,
         })
-            .addOperation(
-                Operation.payment({
-                    destination: receiver,
-                    asset: Asset.native(),
-                    amount: amount.toString(),
-                })
-            )
+            .addOperation(operation)
             .setTimeout(180) // 3 minute timeout
             .build();
 
