@@ -120,12 +120,6 @@ npm run preview
 </p>
 *Wallet selection modal supporting Freighter, xBull, Albedo, and Hana.*
 
-### Send XLM
-<p align="center">
-  <img src="screenshots/send-xlm.png" alt="Send XLM Page" width="800" style="border-radius: 8px;"/>
-</p>
-*Dedicated page for building, signing, and broadcasting payments with full status tracking.*
-
 ### Transaction History
 <p align="center">
   <img src="screenshots/history.png" alt="Transaction History" width="800" style="border-radius: 8px;"/>
