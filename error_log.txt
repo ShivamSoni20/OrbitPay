@@ -1,0 +1,82 @@
+﻿cargo : co
+ntracts\po
+ll\src\lib
+.rs:44:22:
+ warning: 
+use of dep
+recated 
+method `so
+roban_sdk:
+:events::E
+vents::pub
+lish`: 
+use the #[
+contractev
+ent] 
+macro on 
+a 
+contract 
+event type
+At line:1 
+char:656
++ ...  $en
+v:PATH; 
+cargo 
+check --ma
+nifest-pat
+h contract
+s/poll/Car
+go.toml 
+--t ...
++         
+        ~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~
+    + Cat 
+   egory  
+  Info    
+          
+    :     
+NotS    
+pecif    
+ied:     
+(cont    
+racts    
+\poll    
+\...r    
+act e    
+vent     
+type:    
+Strin    
+g) []    
+, Rem    
+oteEx    
+cepti    
+on
+    + Ful 
+   lyQua  
+  lifie   
+ dErro    
+rId :     
+Nati    
+veCom    
+mandE    
+rror
+ 
+warning: `
+poll-contr
+act` 
+(lib) 
+generated 
+1 warning
+    
+Finished 
+`release` 
+profile [o
+ptimized] 
+target(s) 
+in 0.43s

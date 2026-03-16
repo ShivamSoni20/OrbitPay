@@ -1,0 +1,127 @@
+﻿cargo :   
+ 
+Compiling 
+poll-contr
+act 
+v0.0.0 (D:
+\Gihtub Ma
+in\OrbitPa
+y\stellar-
+payment-da
+pp\contrac
+ts\poll)
+At line:1 
+char:656
++ ...  $en
+v:PATH; 
+cargo 
+build --ma
+nifest-pat
+h contract
+s/poll/Car
+go.toml 
+--t ...
++         
+        ~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~
+    + Cat 
+   egory  
+  Info    
+          
+    :     
+NotS    
+pecif    
+ied:     
+(   C    
+ompil    
+ing p    
+o...c    
+ontra    
+cts\p    
+oll):    
+Strin    
+g) []    
+, Rem    
+oteEx    
+cepti    
+on
+    + Ful 
+   lyQua  
+  lifie   
+ dErro    
+rId :     
+Nati    
+veCom    
+mandE    
+rror
+ 
+warning: 
+use of dep
+recated 
+method `so
+roban_sdk:
+:events::E
+vents::pub
+lish`: 
+use the #[
+contractev
+ent] 
+macro on 
+a 
+contract 
+event type
+  --> cont
+racts\poll
+\src\lib.r
+s:44:22
+   |
+44 |      
+   env.eve
+nts().publ
+ish((symbo
+l_short!("
+vote"), 
+option), n
+ew_votes);
+   |      
+          
+      
+^^^^^^^
+   |
+   = 
+note: `#[w
+arn(deprec
+ated)]` 
+on by 
+default
+
+error: 
+linker `ll
+d-link` 
+not found
+  |
+  = note: 
+program 
+not found
+
+warning: `
+poll-contr
+act` 
+(lib) 
+generated 
+1 warning
+error: 
+could not 
+compile `p
+oll-contra
+ct` (lib) 
+due to 1 
+previous 
+error; 1 
+warning 
+emitted

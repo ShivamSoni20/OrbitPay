@@ -1,111 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrbitPay | Stellar dApp</title>
-    <meta name="description" content="A premium Stellar payment dApp on the Testnet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="OrbitPay — A premium Stellar dApp featuring multi-wallet integration, smart contract voting, and real-time transaction tracking on Stellar Testnet." />
+    <title>OrbitPay | Stellar FinTech Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>" />
 </head>
 <body>
-    <div class="background-animation"></div>
-    <div class="container">
-        
-        <header class="app-header">
-            <div class="logo">
-                <span class="icon">🚀</span>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<div class="app-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">O</div>
+            <div>
                 <h1>OrbitPay</h1>
             </div>
-            <div class="network-badge">
-                <span class="pulse-dot"></span>
-                Stellar Testnet
+            <span class="brand-badge">TESTNET</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <span class="nav-label">Main</span>
+
+            <div class="nav-item active" data-page="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Dashboard</span>
+            </div>
+
+            <div class="nav-item" data-page="send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <span>Send XLM</span>
+            </div>
+
+            <div class="nav-item" data-page="poll">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="4" height="16" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="16" y="2" width="4" height="18" rx="1"/></svg>
+                <span>Community Poll</span>
+            </div>
+
+            <div class="nav-item" data-page="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>History</span>
+            </div>
+
+            <span class="nav-label">System</span>
+
+            <div class="nav-item" data-page="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Settings</span>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div id="network-stats-sidebar" class="network-stats">
+                <div class="net-stat">
+                    <div class="net-label">Ledger</div>
+                    <div class="net-value" id="ledger-number">—</div>
+                </div>
+                <div class="net-stat">
+                    <div class="net-label">Base Fee</div>
+                    <div class="net-value" id="base-fee">—</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="mobile-menu-btn" class="mobile-toggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <span class="page-title" id="page-title">Dashboard</span>
+            </div>
+            <div class="header-right">
+                <div class="network-badge">
+                    <span class="dot"></span>
+                    <span>Stellar Testnet</span>
+                </div>
+
+                <!-- Before Connect -->
+                <button id="connect-btn" class="connect-wallet-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <span>Connect Wallet</span>
+                </button>
+
+                <!-- After Connect - starts hidden -->
+                <div id="wallet-pill" class="wallet-pill hidden">
+                    <span class="wallet-addr" id="wallet-address"></span>
+                    <span class="wallet-balance-badge" id="wallet-balance">0 XLM</span>
+                    <button class="icon-btn" id="copy-addr-btn" title="Copy address">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                    <button class="icon-btn" id="qr-btn" title="Show QR code">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8"/><rect x="14" y="2" width="8" height="8"/><rect x="2" y="14" width="8" height="8"/><rect x="14" y="14" width="4" height="4"/><line x1="22" y1="18" x2="22" y2="22"/><line x1="18" y1="22" x2="22" y2="22"/></svg>
+                    </button>
+                    <button class="disconnect-btn" id="disconnect-btn" title="Disconnect">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <main class="app-card">
-            
-            <section id="connection-prompt" class="card-section">
-                <div class="prompt-content">
-                    <h2>Welcome to the Future of Payments</h2>
-                    <p>Connect your Freighter wallet to instantly send and receive XLM on the Stellar Testnet with zero hassle.</p>
-                </div>
-                <button id="connect-btn" class="primary-btn pulse-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-                    Connect Freighter Wallet
-                </button>
-            </section>
+        <!-- Page Content -->
+        <div class="page-container">
 
-            <section id="wallet-info" class="card-section hidden fade-in">
-                <div class="wallet-header">
-                    <h3>Wallet Connected</h3>
-                    <button id="disconnect-btn" class="secondary-btn small-btn">Disconnect</button>
-                </div>
-                <div class="address-box group">
-                    <span class="label">Public Key</span>
-                    <p id="wallet-address" class="address-text trunc" title="Click to copy">G...</p>
-                </div>
-            </section>
+            <!-- ===== DASHBOARD PAGE ===== -->
+            <div id="page-dashboard" class="page-view active">
 
-            <section id="balance-section" class="card-section hidden fade-in delay-1">
-                <div class="balance-box interactive-box">
-                    <div class="balance-icon">💎</div>
-                    <div class="balance-details">
-                        <span class="label">Available Balance</span>
-                        <h2 class="balance-amount"><span id="wallet-balance">0.00</span> <span class="currency">XLM</span></h2>
+                <!-- Connection Prompt (shown when not connected) -->
+                <div id="connection-prompt" class="connection-prompt">
+                    <div class="prompt-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                     </div>
+                    <h2>Welcome to OrbitPay</h2>
+                    <p>Connect your Stellar wallet to access the dashboard, send XLM, vote in the Community Poll, and track transactions in real-time.</p>
                 </div>
-            </section>
 
-            <section id="payment-section" class="card-section hidden fade-in delay-2">
-                <h3>Send Payment</h3>
-                <form id="payment-form" class="payment-form">
-                    <div class="input-group">
-                        <label for="receiver">Recipient Address</label>
-                        <input type="text" id="receiver" placeholder="Ex: GAXG..." required autocomplete="off" spellcheck="false">
-                        <div class="focus-border"></div>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="amount">Amount (XLM)</label>
-                        <div class="amount-wrapper">
-                            <input type="number" id="amount" placeholder="0.00" step="0.0000001" min="0.0000001" required>
-                            <span class="currency-tag">XLM</span>
+                <!-- Dashboard Content (shown when connected) -->
+                <div id="dashboard-content" class="hidden">
+                    <div class="dashboard-grid">
+                        <!-- Balance Card -->
+                        <div class="card stat-card accent">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                            </div>
+                            <div class="stat-value" id="dash-balance">0.00</div>
+                            <div class="stat-label">XLM Balance</div>
+                        </div>
+
+                        <!-- Wallet Card -->
+                        <div class="card stat-card cyan">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            </div>
+                            <div class="stat-value" id="dash-wallet" style="font-size:15px;">—</div>
+                            <div class="stat-label">Wallet Address</div>
+                        </div>
+
+                        <!-- Total Votes Card -->
+                        <div class="card stat-card purple">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="4" height="16" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="16" y="2" width="4" height="18" rx="1"/></svg>
+                            </div>
+                            <div class="stat-value" id="dash-total-votes">0</div>
+                            <div class="stat-label">Total Poll Votes</div>
+                        </div>
+
+                        <!-- Network Card -->
+                        <div class="card stat-card success">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="stat-value" id="dash-ledger">—</div>
+                            <div class="stat-label">Current Ledger</div>
                         </div>
                     </div>
 
-                    <button type="submit" id="send-btn" class="primary-btn submit-btn">
-                        <span>Send XLM</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </form>
-            </section>
-
-            <section id="poll-section" class="card-section hidden fade-in delay-3">
-                <div class="section-header">
-                    <h3>Community Poll</h3>
-                    <span class="live-tag">LIVE</span>
+                    <!-- Recent Transactions Summary -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                Recent Transactions
+                            </h3>
+                            <a href="#" id="view-all-tx" style="font-size:13px;">View All →</a>
+                        </div>
+                        <div class="card-body" id="dash-recent-tx">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                <p>No transactions yet</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p class="section-desc">Vote for your favorite Stellar project type!</p>
-                
-                <div id="poll-options" class="poll-options">
-                    <div class="poll-skeleton">Loading poll...</div>
-                </div>
-            </section>
-
-            <div id="status-box" class="status-message hidden mt-4">
-                <div id="status-content"></div>
             </div>
-            
-        </main>
-        
-        <footer class="app-footer">
-            <p>Built for the Stellar White Belt Challenge</p>
-        </footer>
-    </div>
 
-    <!-- Vite Inject -->
-    <script type="module" src="app.js"></script>
+            <!-- ===== SEND PAGE ===== -->
+            <div id="page-send" class="page-view">
+                <div class="card" style="max-width:520px;">
+                    <div class="card-header">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Send XLM
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="payment-form">
+                            <div class="form-group">
+                                <label class="form-label" for="receiver">Recipient Address</label>
+                                <input class="form-input" type="text" id="receiver" placeholder="G..." autocomplete="off" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="amount">Amount (XLM)</label>
+                                <input class="form-input" type="number" id="amount" placeholder="0.00" step="0.0000001" min="0.0000001" required />
+                            </div>
+                            <button type="submit" class="btn-primary" id="send-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                <span>Send XLM</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== POLL PAGE ===== -->
+            <div id="page-poll" class="page-view">
+                <div class="card" style="max-width:600px;">
+                    <div class="card-header">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="4" height="16" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="16" y="2" width="4" height="18" rx="1"/></svg>
+                            Community Poll
+                        </h3>
+                        <span class="text-sm text-muted">What should we build next?</span>
+                    </div>
+                    <div class="card-body" id="poll-options"></div>
+                    <div class="poll-total" id="poll-total">Total votes: <strong>0</strong></div>
+                </div>
+            </div>
+
+            <!-- ===== HISTORY PAGE ===== -->
+            <div id="page-history" class="page-view">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Transaction History
+                        </h3>
+                    </div>
+                    <div class="card-body" id="history-list">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                            <p>Connect your wallet to view transaction history</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SETTINGS PAGE ===== -->
+            <div id="page-settings" class="page-view">
+                <div class="card" style="max-width:520px;">
+                    <div class="card-header">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            Settings
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Contract ID</label>
+                            <input class="form-input" type="text" value="CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Network</label>
+                            <input class="form-input" type="text" value="Stellar Testnet" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Horizon Server</label>
+                            <input class="form-input" type="text" value="https://horizon-testnet.stellar.org" readonly />
+                        </div>
+                        <p class="text-sm text-muted mt-16">OrbitPay v2.0 — Built for the Stellar Yellow Belt Challenge</p>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- .page-container -->
+    </main>
+</div><!-- .app-layout -->
+
+<script type="module" src="app.js"></script>
 </body>
 </html>

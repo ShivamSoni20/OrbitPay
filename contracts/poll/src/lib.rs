@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, symbol_short, vec, Env, Symbol, Vec, log};
+use soroban_sdk::{contract, contractimpl, symbol_short, vec, Env, Symbol, Vec};
 
 #[contract]
 pub struct PollContract;
@@ -12,18 +12,20 @@ impl PollContract {
             panic!("Already initialized");
         }
         env.storage().instance().set(&symbol_short!("opts"), &options);
-        
-        for option in options.iter() {
-            env.storage().instance().set(&option, &0u32);
+
+        for i in 0..options.len() {
+            let opt = options.get(i).unwrap();
+            env.storage().instance().set(&opt, &0u32);
         }
     }
 
     /// Cast a vote for a specific option.
     pub fn vote(env: Env, option: Symbol) {
         let options: Vec<Symbol> = env.storage().instance().get(&symbol_short!("opts")).unwrap();
-        
+
         let mut found = false;
-        for opt in options.iter() {
+        for i in 0..options.len() {
+            let opt = options.get(i).unwrap();
             if opt == option {
                 found = true;
                 break;
@@ -40,8 +42,6 @@ impl PollContract {
 
         // Emit event for real-time synchronization
         env.events().publish((symbol_short!("vote"), option), new_votes);
-        
-        log!(&env, "Vote cast for: {}", option);
     }
 
     /// Get current results.

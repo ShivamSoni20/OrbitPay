@@ -1,284 +1,512 @@
 /**
- * OrbitPay | Yellow Belt Challenge (Level 2)
- * 
- * Features:
- * - Multi-Wallet Integration (StellarWalletsKit)
- * - Soroban Smart Contract Interaction (Live Poll)
- * - Real-time Event Handling
- * - Enhanced Error Handling & Transaction Tracking
+ * OrbitPay — Main Application Entry Point
+ * @module app
+ *
+ * Orchestrates wallet connection, payment, polling, transaction history,
+ * network stats, navigation, and the toast notification system.
  */
 
-import { 
-    StellarWalletsKit, 
-    WalletNetwork, 
-    allowAllModules, 
-    FREIGHTER_ID, 
-    ALBEDO_ID, 
-    XBULL_ID 
-} from "@creit.tech/stellar-wallets-kit";
 import * as StellarSdk from "stellar-sdk";
+import { initWalletKit, connectWallet, disconnectWallet, signTransaction } from "./js/wallet.js";
+import { showToast } from "./js/toast.js";
+import { truncateAddress, formatNumber, formatDate, copyToClipboard, showQRModal } from "./js/utils.js";
+import { getOptions, getAllVotes, castVote, subscribeToVoteEvents } from "./js/contract.js";
 
-// --- Configuration & Constants ---
-const { Horizon, TransactionBuilder, Networks, Asset, Operation, StrKey, rpc } = StellarSdk;
+// --- Stellar SDK Destructuring ---
+const { Horizon, TransactionBuilder, Networks, Asset, Operation, StrKey } = StellarSdk;
+
+// --- Configuration ---
 const HORIZON_URL = "https://horizon-testnet.stellar.org";
-const RPC_URL = "https://soroban-testnet.stellar.org"; // For contract interaction
-const CONTRACT_ID = "CCX5AUE6UGE3D4PQZZX4PQZZX4PQZZX4PQZZX4PQZZX4PQZZX4PQZZX4"; // Placeholder (Update after deployment)
-
 const server = new Horizon.Server(HORIZON_URL);
-const rpcServer = new rpc.Server(RPC_URL);
 
-// Initialize Wallet Kit
-const kit = new StellarWalletsKit({
-    network: WalletNetwork.TESTNET,
-    modules: allowAllModules(),
-});
-
-// --- State Management ---
-let appState = {
+// --- Application State ---
+const state = {
     userPublicKey: null,
-    accountBalance: "0.00",
+    balance: "0.00",
     isProcessing: false,
-    pollData: [
-        { id: "Social", name: "Social dApp", votes: 0 },
-        { id: "DeFi", name: "DeFi Protocol", votes: 0 },
-        { id: "Gaming", name: "Play-to-Earn Game", votes: 0 }
-    ],
+    pollData: [], // Now fetched dynamically
+    pollLoaded: false,
     votedOption: null,
+    transactions: [],
+    currentPage: "dashboard",
+    lastPollUpdate: new Date(),
+    unsubscribeEvents: null,
 };
 
-// --- DOM Elements ---
-const DOM = {
-    connectBtn: document.getElementById("connect-btn"),
-    disconnectBtn: document.getElementById("disconnect-btn"),
-    walletAddressDisplay: document.getElementById("wallet-address"),
-    balanceDisplay: document.getElementById("wallet-balance"),
+// --- DOM References ---
+const $ = (id) => document.getElementById(id);
 
-    // Sections
-    connectionPrompt: document.getElementById("connection-prompt"),
-    walletInfo: document.getElementById("wallet-info"),
-    balanceSection: document.getElementById("balance-section"),
-    paymentSection: document.getElementById("payment-section"),
-    pollSection: document.getElementById("poll-section"),
-    pollOptions: document.getElementById("poll-options"),
+// ======================================================
+//  INITIALIZATION
+// ======================================================
 
-    // Form & Status
-    paymentForm: document.getElementById("payment-form"),
-    statusBox: document.getElementById("status-box"),
-    statusContent: document.getElementById("status-content"),
-    sendBtn: document.getElementById("send-btn"),
-};
-
-// --- Core Initialization ---
+/** Bootstrap the entire application. */
 async function init() {
-    console.log("OrbitPay Yellow Belt dApp Initialized");
+    console.log("🚀 OrbitPay v2.0 initialized");
+
+    initWalletKit();
+    setupNavigation();
     setupEventListeners();
-    renderPoll();
-    // Simulate live data for now until final contract bridge
-    startLiveSimulation();
+    
+    // Initial Poll Load
+    await refreshPollData();
+    
+    fetchNetworkStats();
+    setInterval(fetchNetworkStats, 15000);
 }
 
-// --- Event Listeners ---
-function setupEventListeners() {
-    DOM.connectBtn.addEventListener("click", handleConnect);
-    DOM.disconnectBtn.addEventListener("click", handleDisconnect);
-    DOM.paymentForm.addEventListener("submit", handlePaymentSubmit);
+// ======================================================
+//  NAVIGATION (Sidebar Router)
+// ======================================================
+
+function setupNavigation() {
+    document.querySelectorAll(".nav-item[data-page]").forEach((item) => {
+        item.addEventListener("click", () => navigateTo(item.dataset.page));
+    });
+
+    $("view-all-tx")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigateTo("history");
+    });
+
+    $("mobile-menu-btn")?.addEventListener("click", toggleMobileMenu);
+    $("sidebar-overlay")?.addEventListener("click", toggleMobileMenu);
 }
 
-// --- UI Logic ---
-function updateUI() {
-    const isUserConnected = !!appState.userPublicKey;
+function navigateTo(page) {
+    // Cleanup old listeners if moving away from poll
+    if (state.currentPage === "poll" && page !== "poll") {
+        if (state.unsubscribeEvents) {
+            state.unsubscribeEvents();
+            state.unsubscribeEvents = null;
+        }
+    }
 
-    DOM.connectionPrompt.classList.toggle("hidden", isUserConnected);
-    DOM.walletInfo.classList.toggle("hidden", !isUserConnected);
-    DOM.balanceSection.classList.toggle("hidden", !isUserConnected);
-    DOM.paymentSection.classList.toggle("hidden", !isUserConnected);
-    DOM.pollSection.classList.toggle("hidden", !isUserConnected);
+    state.currentPage = page;
 
-    if (isUserConnected) {
-        DOM.walletAddressDisplay.innerText = `${appState.userPublicKey.slice(0, 8)}...${appState.userPublicKey.slice(-8)}`;
-        DOM.balanceDisplay.innerText = parseFloat(appState.accountBalance).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 7
+    document.querySelectorAll(".nav-item[data-page]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.page === page);
+    });
+
+    document.querySelectorAll(".page-view").forEach((view) => {
+        view.classList.toggle("active", view.id === `page-${page}`);
+    });
+
+    const titles = { dashboard: "Dashboard", send: "Send XLM", poll: "Community Poll", history: "Transaction History", settings: "Settings" };
+    $("page-title").textContent = titles[page] || "Dashboard";
+
+    $("sidebar")?.classList.remove("open");
+    $("sidebar-overlay")?.classList.remove("open");
+
+    // Page-specific initialization
+    if (page === "poll") {
+        refreshPollData();
+        state.unsubscribeEvents = subscribeToVoteEvents(() => {
+            console.log("New results detected on-chain!");
+            refreshPollData(true);
         });
-    } else {
-        hideStatus();
     }
+
+    if (page === "history" && state.userPublicKey) fetchTransactions();
 }
 
-function showStatus(message, type = "success") {
-    DOM.statusBox.classList.remove("hidden", "status-success", "status-error");
-    DOM.statusBox.classList.add(`status-${type}`);
-    DOM.statusContent.innerHTML = message;
+function toggleMobileMenu() {
+    $("sidebar")?.classList.toggle("open");
+    $("sidebar-overlay")?.classList.toggle("open");
 }
 
-function hideStatus() {
-    DOM.statusBox.classList.add("hidden");
+// ======================================================
+//  EVENT LISTENERS
+// ======================================================
+
+function setupEventListeners() {
+    $("connect-btn")?.addEventListener("click", handleConnect);
+    $("disconnect-btn")?.addEventListener("click", handleDisconnect);
+    $("payment-form")?.addEventListener("submit", handlePayment);
+    $("copy-addr-btn")?.addEventListener("click", handleCopyAddress);
+    $("qr-btn")?.addEventListener("click", () => showQRModal(state.userPublicKey));
 }
 
-function setBtnLoading(isLoading, text = "Processing...") {
-    DOM.sendBtn.disabled = isLoading;
-    if (isLoading) {
-        DOM.sendBtn.innerHTML = `<div class="loading"><div class="loader"></div> ${text}</div>`;
-    } else {
-        DOM.sendBtn.innerHTML = `<span>Send XLM</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+// ======================================================
+//  UI UPDATES
+// ======================================================
+
+function updateUI() {
+    const connected = !!state.userPublicKey;
+
+    $("connect-btn")?.classList.toggle("hidden", connected);
+    $("wallet-pill")?.classList.toggle("hidden", !connected);
+    $("connection-prompt")?.classList.toggle("hidden", connected);
+    $("dashboard-content")?.classList.toggle("hidden", !connected);
+
+    if (connected) {
+        const truncated = truncateAddress(state.userPublicKey);
+        $("wallet-address").textContent = truncated;
+        $("wallet-balance").textContent = `${formatNumber(state.balance)} XLM`;
+        $("dash-balance").textContent = formatNumber(state.balance, 4);
+        $("dash-wallet").textContent = truncated;
     }
+
+    const totalVotes = state.pollData.reduce((a, b) => a + b.votes, 0);
+    $("dash-total-votes").textContent = totalVotes;
 }
 
-// --- Poll & Real-time Integration ---
-function renderPoll() {
-    const totalVotes = appState.pollData.reduce((acc, curr) => acc + curr.votes, 0);
-    
-    DOM.pollOptions.innerHTML = appState.pollData.map(option => {
-        const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
-        const isVoted = appState.votedOption === option.id;
-        
-        return `
-            <div class="poll-option-card ${isVoted ? 'voted' : ''}" onclick="window.handleVote('${option.id}')">
-                <div class="option-info">
-                    <span class="option-name">${option.name}</span>
-                    <span class="option-count">${option.votes} votes (${Math.round(percentage)}%)</span>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: ${percentage}%"></div>
-                </div>
-            </div>
-        `;
-    }).join("");
-}
-
-// Expose handleVote to global scope for the onclick handler
-window.handleVote = async (optionId) => {
-    if (appState.votedOption) {
-        showStatus("You have already voted!", "error");
-        return;
-    }
-    
-    showStatus(`Casting vote for ${optionId}...`, "success");
-    // In a real dApp, this would call the contract:
-    // await callContract("vote", [optionId]);
-    
-    // Simulate immediate update (Real-time local)
-    const option = appState.pollData.find(o => o.id === optionId);
-    if (option) {
-        option.votes++;
-        appState.votedOption = optionId;
-        renderPoll();
-        showStatus(`Vote cast successfully for ${option.name}!`, "success");
-    }
-};
-
-function startLiveSimulation() {
-    // Simulate real-time votes from other "users"
-    setInterval(() => {
-        const randomOption = appState.pollData[Math.floor(Math.random() * appState.pollData.length)];
-        randomOption.votes += Math.floor(Math.random() * 2);
-        renderPoll();
-    }, 15000); // Random vote every 15 seconds
-}
-
-// --- Wallet & Transaction Logic ---
+// ======================================================
+//  WALLET CONNECTION
+// ======================================================
 
 async function handleConnect() {
-    hideStatus();
     try {
-        await kit.openModal({
-            onSelectWallet: async (wallet) => {
-                await kit.setWallet(wallet.id);
-                const { address } = await kit.getAddress();
-                appState.userPublicKey = address;
-                await syncAccountData();
-                showStatus(`Connected to ${wallet.name} successfully!`, "success");
-            }
-        });
+        const address = await connectWallet();
+        state.userPublicKey = address;
+        await syncAccountData();
+        showToast("Wallet connected successfully!", "success");
+        fetchTransactions();
     } catch (err) {
         console.error("Connection error:", err);
-        showStatus(`Connection failed: ${err.message}`, "error");
+        if (err?.code === -1 && err?.message?.includes("closed")) return;
+        showToast(err?.message || "Failed to connect wallet", "error");
     }
 }
 
-async function handleDisconnect() {
-    appState.userPublicKey = null;
-    appState.accountBalance = "0.00";
+function handleDisconnect() {
+    disconnectWallet();
+    state.userPublicKey = null;
+    state.balance = "0.00";
+    state.transactions = [];
     updateUI();
+    renderDashboardTx();
+    showToast("Wallet disconnected", "info");
 }
 
 async function syncAccountData() {
-    if (!appState.userPublicKey) return;
+    if (!state.userPublicKey) return;
     try {
-        const account = await server.loadAccount(appState.userPublicKey);
-        const nativeBalance = account.balances.find(b => b.asset_type === "native");
-        appState.accountBalance = nativeBalance ? nativeBalance.balance : "0.00";
+        const account = await server.loadAccount(state.userPublicKey);
+        const native = account.balances.find((b) => b.asset_type === "native");
+        state.balance = native ? native.balance : "0.00";
     } catch (err) {
         console.error("Horizon error:", err);
-        if (err.response && err.response.status === 404) {
-            showStatus("Account not fund on Testnet. Fund it with Friendbot.", "error");
+        if (err?.response?.status === 404) {
+            showToast("Account not found on Testnet. Fund it via Friendbot.", "warning");
         }
     }
     updateUI();
 }
 
-async function handlePaymentSubmit(e) {
+async function handleCopyAddress() {
+    if (!state.userPublicKey) return;
+    const ok = await copyToClipboard(state.userPublicKey);
+    showToast(ok ? "Address copied to clipboard!" : "Failed to copy address", ok ? "success" : "error");
+}
+
+// ======================================================
+//  SEND XLM
+// ======================================================
+
+async function handlePayment(e) {
     e.preventDefault();
-    hideStatus();
+    if (!state.userPublicKey) {
+        showToast("Please connect your wallet first", "warning");
+        return;
+    }
 
-    const receiver = document.getElementById("receiver").value.trim();
-    const amount = document.getElementById("amount").value.trim();
+    const receiver = $("receiver").value.trim();
+    const amount = $("amount").value.trim();
 
-    // Validations (Required: 3 error types handled)
     if (!StrKey.isValidEd25519PublicKey(receiver)) {
-        showStatus("Error: Invalid address format.", "error");
+        showToast("Invalid recipient address format", "error");
         return;
     }
-
     if (isNaN(amount) || parseFloat(amount) <= 0) {
-        showStatus("Error: Amount must be greater than zero.", "error");
+        showToast("Amount must be greater than zero", "error");
+        return;
+    }
+    if (parseFloat(amount) > parseFloat(state.balance)) {
+        showToast("Insufficient XLM balance", "error");
         return;
     }
 
-    if (parseFloat(amount) > parseFloat(appState.accountBalance)) {
-        showStatus("Error: Insufficient balance.", "error");
-        return;
-    }
-
-    setBtnLoading(true, "Preparing...");
+    const btn = $("send-btn");
+    setBtnState(btn, true, "Preparing...");
 
     try {
-        const sourceAccount = await server.loadAccount(appState.userPublicKey);
+        const sourceAccount = await server.loadAccount(state.userPublicKey);
         const fee = await server.fetchBaseFee();
 
-        const transaction = new TransactionBuilder(sourceAccount, {
+        const tx = new TransactionBuilder(sourceAccount, {
             fee: fee.toString(),
             networkPassphrase: Networks.TESTNET,
         })
-            .addOperation(Operation.payment({
-                destination: receiver,
-                asset: Asset.native(),
-                amount: amount.toString(),
-            }))
+            .addOperation(Operation.payment({ destination: receiver, asset: Asset.native(), amount: amount.toString() }))
             .setTimeout(TransactionBuilder.TIMEOUT_INFINITE)
             .build();
 
-        setBtnLoading(true, "Waiting for Signature...");
-        
-        // Use Wallet Kit for signing
-        const { result: signedXDR } = await kit.signTransaction(transaction.toXDR());
-        
-        setBtnLoading(true, "Broadcasting...");
+        setBtnState(btn, true, "Waiting for Signature...");
+        const signedXDR = await signTransaction(tx.toXDR());
+
+        setBtnState(btn, true, "Broadcasting...");
         const result = await server.submitTransaction(TransactionBuilder.fromXDR(signedXDR, Networks.TESTNET));
 
-        showStatus(`
-            <strong>Success!</strong> Sent ${amount} XLM.<br>
-            <a href="https://stellar.expert/explorer/testnet/tx/${result.hash}" target="_blank" style="color: #00d2ff;">Transaction Explorer</a>
-        `, "success");
-
+        showToast(`Sent ${amount} XLM! <a href="https://stellar.expert/explorer/testnet/tx/${result.hash}" target="_blank" style="color:#818cf8">View on Explorer</a>`, "success", 6000);
+        $("payment-form").reset();
         await syncAccountData();
+        fetchTransactions();
     } catch (err) {
         console.error("Tx Error:", err);
-        showStatus(`Transaction Failed: ${err.message}`, "error");
+        showToast(`Transaction failed: ${err?.message || err}`, "error");
     } finally {
-        setBtnLoading(false);
+        setBtnState(btn, false);
     }
 }
 
-init();
+function setBtnState(btn, loading, text = "") {
+    btn.disabled = loading;
+    if (loading) {
+        btn.innerHTML = `<div class="loading" style="display:flex;align-items:center;gap:8px"><div class="loader" style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>${text}</div>`;
+    } else {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Send XLM</span>`;
+    }
+}
 
+// ======================================================
+//  COMMUNITY POLL (ON-CHAIN)
+// ======================================================
+
+/** Fetch real data from the contract. */
+async function refreshPollData(isQuiet = false) {
+    if (!isQuiet) {
+        $("poll-options").innerHTML = '<div class="skeleton" style="height:60px;margin-bottom:12px"></div>'.repeat(3);
+    }
+    
+    try {
+        const optionNames = await getOptions();
+        const voteCounts = await getAllVotes();
+        
+        state.pollData = optionNames.map((name, i) => ({
+            id: name,
+            name: name,
+            votes: voteCounts[name] || 0,
+            color: ["accent", "cyan", "purple"][i % 3]
+        }));
+        
+        state.pollLoaded = true;
+        state.lastPollUpdate = new Date();
+        renderPoll();
+    } catch (err) {
+        console.error("Poll fetch error:", err);
+        showToast("Failed to fetch on-chain poll data", "error");
+    }
+}
+
+/** Render the poll options UI. */
+function renderPoll() {
+    const total = state.pollData.reduce((a, b) => a + b.votes, 0);
+    const container = $("poll-options");
+    if (!container) return;
+
+    // Badge styling
+    const badge = `<span class="network-badge" style="margin-left: 10px; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 8px; font-size: 10px;">⛓ On-chain</span>`;
+    const title = $("page-poll").querySelector("h3");
+    if (title && !title.innerHTML.includes("On-chain")) {
+        title.innerHTML += badge;
+    }
+
+    container.innerHTML = state.pollData.map((opt) => {
+        const pct = total > 0 ? ((opt.votes / total) * 100).toFixed(1) : 0;
+        const isVoted = state.votedOption === opt.id;
+        return `
+            <div class="poll-option ${isVoted ? "voted" : ""}" onclick="window._vote('${opt.id}')">
+                <div class="poll-bar" style="width:${pct}%"></div>
+                <div class="poll-content">
+                    <span class="poll-name">
+                        ${opt.name}
+                        ${isVoted ? '<span class="voted-badge">✓ You voted</span>' : ""}
+                    </span>
+                    <div class="poll-stats">
+                        <span>${opt.votes} votes</span>
+                        <span class="poll-pct">${pct}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    updatePollTimestamp();
+    $("dash-total-votes").textContent = total;
+}
+
+/** Update the 'Last updated' timestamp label helper. */
+function updatePollTimestamp() {
+    const el = $("poll-total");
+    if (!el || state.currentPage !== "poll") return;
+    
+    const total = state.pollData.reduce((a, b) => a + b.votes, 0);
+    const lastUpdated = Math.round((new Date() - state.lastPollUpdate) / 1000);
+    
+    el.innerHTML = `
+        Total votes: <strong>${total}</strong><br>
+        <span id="poll-timer-label" style="font-size: 11px; color: var(--text-muted); margin-top: 8px; display: block;">
+            Last updated: ${lastUpdated} seconds ago
+        </span>
+    `;
+}
+
+// Global UI timer for the poll timestamp
+setInterval(() => {
+    if (state.currentPage === "poll" && state.pollLoaded) {
+        updatePollTimestamp();
+    }
+}, 1000);
+
+/** Global vote handler - now with real on-chain logic. */
+window._vote = async (optionId) => {
+    if (!state.userPublicKey) {
+        showToast("Connect your wallet to vote", "warning");
+        return;
+    }
+    if (state.votedOption) {
+        showToast("You have already voted on-chain!", "warning");
+        return;
+    }
+    
+    if (state.isProcessing) return;
+    state.isProcessing = true;
+
+    showToast(`Preparing on-chain vote for ${optionId}...`, "info");
+    
+    try {
+        const txHash = await castVote(optionId, signTransaction, state.userPublicKey);
+        
+        state.votedOption = optionId;
+        await refreshPollData(true);
+        
+        showToast(`
+            <strong>Vote Confirmed!</strong><br>
+            Your vote for ${optionId} is now permanent.<br>
+            <a href="https://stellar.expert/explorer/testnet/tx/${txHash}" target="_blank" style="color:#818cf8; font-size: 11px;">View on Explorer ↗</a>
+        `, "success", 8000);
+    } catch (err) {
+        console.error("Vote error:", err);
+        const msg = err.message || "";
+        if (msg.includes("Simulation failed")) {
+            showToast("Transaction simulation failed. Check your balance.", "error");
+        } else if (msg.includes("timed out")) {
+            showToast("Transaction timed out. Please try again.", "error");
+        } else if (msg.includes("Already initialized")) {
+             // Panic from contract
+            showToast("You have already voted on-chain!", "error");
+        } else {
+            showToast(`Vote failed: ${msg}`, "error");
+        }
+    } finally {
+        state.isProcessing = false;
+    }
+};
+
+// ======================================================
+//  TRANSACTION HISTORY
+// ======================================================
+
+async function fetchTransactions() {
+    if (!state.userPublicKey) return;
+
+    const historyEl = $("history-list");
+    historyEl.innerHTML = '<div class="skeleton" style="height:50px;margin-bottom:10px"></div>'.repeat(5);
+
+    try {
+        const txs = await server.transactions().forAccount(state.userPublicKey).order("desc").limit(10).call();
+        state.transactions = await Promise.all(
+            txs.records.map(async (tx) => {
+                const ops = await tx.operations();
+                const op = ops.records[0];
+                const isSent = op?.from === state.userPublicKey;
+                return {
+                    hash: tx.hash,
+                    type: isSent ? "Sent" : "Received",
+                    amount: op?.amount || "—",
+                    counterparty: isSent ? op?.to : op?.from || "—",
+                    date: tx.created_at,
+                    isSent,
+                };
+            })
+        );
+        renderTransactionList(historyEl);
+        renderDashboardTx();
+    } catch (err) {
+        console.error("History error:", err);
+        historyEl.innerHTML = `<div class="empty-state"><p>Could not load transactions</p></div>`;
+    }
+}
+
+function renderTransactionList(container) {
+    if (!state.transactions.length) {
+        container.innerHTML = `<div class="empty-state"><p>No transactions found</p></div>`;
+        return;
+    }
+    container.innerHTML = `<ul class="tx-list">${state.transactions.map(renderTxItem).join("")}</ul>`;
+}
+
+function renderDashboardTx() {
+    const el = $("dash-recent-tx");
+    if (!el) return;
+    const recent = state.transactions.slice(0, 3);
+    if (!recent.length) {
+        el.innerHTML = `<div class="empty-state"><p>No transactions yet</p></div>`;
+        return;
+    }
+    el.innerHTML = `<ul class="tx-list">${recent.map(renderTxItem).join("")}</ul>`;
+}
+
+function renderTxItem(tx) {
+    const arrowUp = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
+    const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`;
+
+    return `
+        <li class="tx-item">
+            <div class="tx-icon ${tx.isSent ? "sent" : "received"}">${tx.isSent ? arrowUp : arrowDown}</div>
+            <div class="tx-details">
+                <div class="tx-type">${tx.type}</div>
+                <div class="tx-addr">${truncateAddress(tx.counterparty, 8, 8)}</div>
+            </div>
+            <div class="tx-meta">
+                <div class="tx-amount ${tx.isSent ? "sent" : "received"}">${tx.isSent ? "-" : "+"}${formatNumber(tx.amount, 4)} XLM</div>
+                <div class="tx-date">${formatDate(tx.date)}</div>
+                <a class="tx-link" href="https://stellar.expert/explorer/testnet/tx/${tx.hash}" target="_blank">Explorer ↗</a>
+            </div>
+        </li>
+    `;
+}
+
+// ======================================================
+//  NETWORK STATS
+// ======================================================
+
+async function fetchNetworkStats() {
+    try {
+        const res = await fetch(`${HORIZON_URL}/ledgers?order=desc&limit=1`);
+        const data = await res.json();
+        const ledger = data._embedded?.records?.[0];
+        if (ledger) {
+            const num = ledger.sequence.toLocaleString();
+            const fee = (ledger.base_fee_in_stroops / 10000000).toFixed(5);
+
+            $("ledger-number").textContent = num;
+            $("base-fee").textContent = `${fee}`;
+            $("dash-ledger").textContent = num;
+        }
+    } catch (err) {
+        console.error("Network stats error:", err);
+    }
+}
+
+// Add spin keyframe dynamically
+const style = document.createElement("style");
+style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+document.head.appendChild(style);
+
+// ======================================================
+//  BOOTSTRAP
+// ======================================================
+
+init();
