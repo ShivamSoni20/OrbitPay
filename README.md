@@ -8,6 +8,8 @@
 
 > A premium Stellar dApp built for the **Stellar Yellow Belt (Level 2)** Challenge on Rise In. Features multi-wallet integration, on-chain voting, real-time transaction tracking, and a FinTech-grade UI.
 
+🚀 **Live Demo:** [https://orbit-pay-seven.vercel.app/](https://orbit-pay-seven.vercel.app/)
+
 ---
 
 ## ✨ Features
