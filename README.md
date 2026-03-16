@@ -36,8 +36,8 @@
 | **Contract ID** | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
 | **Network** | Stellar Testnet |
 | **Deploy TX Hash** | `099a579d80eb39a85ce78e9d601568cba1033bba2f090f47faba448a0651abe6` |
-| **Contract Call Hash**| `[REPLACE_WITH_YOUR_VOTE_TX_HASH]` *(Requirement: Hash of a contract call)* |
-| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/099a579d80eb39a85ce78e9d601568cba1033bba2f090f47faba448a0651abe6) |
+| **Contract Call Hash**| `03845abf148f7fd6cc50900f2cfe82ba579f637fd646adb6fa7b37223d223344` |
+| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/03845abf148f7fd6cc50900f2cfe82ba579f637fd646adb6fa7b37223d223344) |
 | **Contract** | [View on Stellar Lab](https://lab.stellar.org/r/testnet/contract/CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC) |
 
 ---
@@ -110,7 +110,7 @@ npm run preview
 
 ### Dashboard
 <p align="center">
-  <img src="screenshots/connected.png" alt="OrbitPay Dashboard" width="800" style="border-radius: 8px;"/>
+  <img src="screenshots/dashboard-new.png" alt="OrbitPay Dashboard" width="800" style="border-radius: 8px;"/>
 </p>
 *Premium dark-themed FinTech dashboard with balance cards, network stats, and recent transactions.*
 
@@ -120,17 +120,23 @@ npm run preview
 </p>
 *Wallet selection modal supporting Freighter, xBull, Albedo, and Hana.*
 
-### Community Poll
+### Send XLM
 <p align="center">
-  <img src="screenshots/success.png" alt="Community Poll Vote Success" width="800" style="border-radius: 8px;"/>
+  <img src="screenshots/send-xlm.png" alt="Send XLM Page" width="800" style="border-radius: 8px;"/>
 </p>
-*Animated vote bars with percentages, vote counts, and "You voted" badges.*
+*Dedicated page for building, signing, and broadcasting payments with full status tracking.*
 
-### Transaction History / Explorer
+### Transaction History
 <p align="center">
-  <img src="screenshots/expert.png" alt="Stellar Expert Transaction" width="800" style="border-radius: 8px;"/>
+  <img src="screenshots/history.png" alt="Transaction History" width="800" style="border-radius: 8px;"/>
 </p>
 *Chronological list of sent/received transactions with amounts and explorer links.*
+
+### Stellar Expert Integration
+<p align="center">
+  <img src="screenshots/explorer-tx.png" alt="Stellar Expert Contract Call Transaction" width="800" style="border-radius: 8px;"/>
+</p>
+*Trustless verification of our on-chain Soroban contract vote transaction directly on the network.*
 
 ---
 
