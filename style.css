@@ -1241,7 +1241,7 @@ a:hover { color: var(--secondary); }
 .landing-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 200;
     background: radial-gradient(circle at center, var(--bg-surface) 0%, var(--bg-deep) 100%);
     display: flex;
     align-items: center;
@@ -1253,6 +1253,15 @@ a:hover { color: var(--secondary); }
     opacity: 0;
     visibility: hidden;
 }
+
+/* Modal Z-Index Overrides for External Wallet Kits */
+div[id^="swk-"], 
+#swk-modal-root, 
+.swk-modal,
+dialog {
+    z-index: 99999 !important;
+}
+
 
 .landing-content {
     text-align: center;

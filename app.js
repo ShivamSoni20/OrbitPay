@@ -57,37 +57,16 @@ async function init() {
     setupNavigation();
     setupEventListeners();
     // Initialize Landing Page Logic
-    const cachedPubKey = localStorage.getItem(CACHE_KEYS.PUBLIC_KEY);
+    const cachedPubKey = localStorage.getItem(CACHE_KEYS.PUBKEY);
     if (cachedPubKey) {
         $("landing-overlay")?.classList.add("fade-out");
         triggerAppReveal();
     } else {
-        $("enter-app-btn")?.addEventListener("click", async () => {
-            const btn = $("enter-app-btn");
-            btn.classList.add("btn-loading");
-            try {
-                const address = await connectWallet();
-                state.userPublicKey = address;
-                localStorage.setItem(CACHE_KEYS.PUBKEY, address);
-                
-                await syncAccountData();
-                showToast("Wallet connected successfully!", "success");
-                fetchTransactions();
-
-                $("landing-overlay")?.classList.add("fade-out");
-                triggerAppReveal();
-            } catch (err) {
-                console.error("Connection error:", err);
-                if (err?.code === -1 && err?.message?.includes("closed")) return;
-                showToast(err?.message || "Failed to connect wallet", "error");
-            } finally {
-                btn.classList.remove("btn-loading");
-            }
-        });
-
+        $("enter-app-btn")?.addEventListener("click", () => handleConnect("enter-app-btn"));
     }
 
     // Initial UI Update from Cache
+
     updateUI();
     if (state.transactions.length > 0) renderDashboardTx();
 
@@ -195,12 +174,13 @@ function triggerAppReveal() {
 // ======================================================
 
 function setupEventListeners() {
-    $("connect-btn")?.addEventListener("click", handleConnect);
+    $("connect-btn")?.addEventListener("click", () => handleConnect("connect-btn"));
     $("disconnect-btn")?.addEventListener("click", handleDisconnect);
     $("payment-form")?.addEventListener("submit", handlePayment);
     $("copy-addr-btn")?.addEventListener("click", handleCopyAddress);
     $("qr-btn")?.addEventListener("click", () => showQRModal(state.userPublicKey));
 }
+
 
 // ======================================================
 //  UI UPDATES
@@ -230,11 +210,15 @@ function updateUI() {
 //  WALLET CONNECTION
 // ======================================================
 
-async function handleConnect() {
+async function handleConnect(btnId = "connect-btn") {
     if (state.isConnecting) return;
     state.isConnecting = true;
-    const btn = $("connect-btn");
-    btn.classList.add("btn-loading");
+    
+    // Ensure we are targeting the actual clicked button or fallback
+    const targetId = typeof btnId === "string" ? btnId : "connect-btn";
+    const btn = $(targetId);
+    
+    btn?.classList.add("btn-loading");
     
     try {
         const address = await connectWallet();
@@ -244,15 +228,22 @@ async function handleConnect() {
         await syncAccountData();
         showToast("Wallet connected successfully!", "success");
         fetchTransactions();
+        
+        // If connecting from landing, dismiss it and trigger the app reveal cascade
+        if (targetId === "enter-app-btn") {
+            $("landing-overlay")?.classList.add("fade-out");
+            triggerAppReveal();
+        }
     } catch (err) {
         console.error("Connection error:", err);
         if (err?.code === -1 && err?.message?.includes("closed")) return;
         showToast(err?.message || "Failed to connect wallet", "error");
     } finally {
         state.isConnecting = false;
-        btn.classList.remove("btn-loading");
+        btn?.classList.remove("btn-loading");
     }
 }
+
 
 
 function handleDisconnect() {
