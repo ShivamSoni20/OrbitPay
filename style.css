@@ -1234,3 +1234,88 @@ a:hover { color: var(--secondary); }
     animation: spin-loader 1s linear infinite;
     margin-bottom: 20px;
 }
+
+/* ============================================
+   LANDING PAGE OVERLAY
+   ============================================ */
+.landing-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: radial-gradient(circle at center, var(--bg-surface) 0%, var(--bg-deep) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s var(--ease-out-expo), visibility 0.8s;
+}
+
+.landing-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.landing-content {
+    text-align: center;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.landing-content > * {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.brand-icon-lg {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 28px; color: #fff;
+    box-shadow: 0 0 30px var(--accent-glow);
+    animation: reveal-item 0.8s var(--ease-out-expo) forwards;
+}
+
+.landing-title {
+    font-size: 72px;
+    line-height: 1.1;
+    margin-top: 24px;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, var(--text-primary), var(--accent));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: reveal-item 1s var(--ease-out-expo) forwards;
+}
+
+.landing-subtitle {
+    font-size: 20px;
+    color: var(--text-secondary);
+    margin-top: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    animation: reveal-item 1.2s var(--ease-out-expo) forwards;
+}
+
+.landing-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 40px;
+    animation: reveal-item 1.4s var(--ease-out-expo) forwards;
+}
+
+.landing-stat { display: flex; flex-direction: column; align-items: center; }
+.landing-stat-val { font-family: var(--font-heading); font-size: 32px; color: var(--text-primary); line-height: 1; }
+.landing-stat-lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; letter-spacing: 1px;}
+
+.landing-btn {
+    margin-top: 48px;
+    padding: 16px 40px;
+    font-size: 16px;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex; align-items: center;
+    animation: reveal-item 1.6s var(--ease-out-expo) forwards;
+}

@@ -56,12 +56,24 @@ async function init() {
     initWalletKit();
     setupNavigation();
     setupEventListeners();
-    
+    // Initialize Landing Page Logic
+    const cachedPubKey = localStorage.getItem(CACHE_KEYS.PUBLIC_KEY);
+    if (cachedPubKey) {
+        $("landing-overlay")?.classList.add("fade-out");
+        triggerAppReveal();
+    } else {
+        $("enter-app-btn")?.addEventListener("click", () => {
+            $("landing-overlay")?.classList.add("fade-out");
+            triggerAppReveal();
+        });
+    }
+
     // Initial UI Update from Cache
     updateUI();
     if (state.transactions.length > 0) renderDashboardTx();
 
     // Initial Poll Load
+
     await refreshPollData();
     
     // Refresh account data if already connected
@@ -145,8 +157,22 @@ function toggleMobileMenu() {
     $("sidebar-overlay")?.classList.toggle("open");
 }
 
+function triggerAppReveal() {
+    // Re-trigger staggered reveal for dashboard to create a unified loading experience
+    const view = $("page-dashboard");
+    if (view) {
+        const sections = view.querySelectorAll(".content-section, .card");
+        sections.forEach((sec, idx) => {
+            sec.style.animation = 'none';
+            sec.offsetHeight; // trigger reflow
+            sec.style.animation = `reveal-item 0.8s var(--ease-out-expo) ${idx * 0.1}s forwards`;
+        });
+    }
+}
+
 // ======================================================
 //  EVENT LISTENERS
+
 // ======================================================
 
 function setupEventListeners() {
