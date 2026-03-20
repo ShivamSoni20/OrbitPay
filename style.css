@@ -157,13 +157,26 @@ a:hover { color: var(--secondary); }
 }
 
 .sidebar-brand .brand-icon {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--accent), var(--cyan));
-    border-radius: var(--radius-sm);
+    width: 42px; height: 42px;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 16px; color: #fff;
-    box-shadow: 0 0 20px var(--accent-glow);
+    border-radius: var(--radius-sm);
 }
+
+.orbit-logo { width: 100%; height: 100%; }
+
+.orbit-ring-1 {
+    transform-origin: 50px 50px;
+    animation: ring-spin 8s linear infinite;
+}
+
+.orbit-ring-2 {
+    transform-origin: 50px 50px;
+    animation: ring-spin-reverse 12s linear infinite;
+}
+
+@keyframes ring-spin { to { transform: rotate(-30deg) rotateZ(360deg); } }
+@keyframes ring-spin-reverse { to { transform: rotate(60deg) rotateZ(-360deg); } }
+
 
 .sidebar-brand h1 {
     font-size: 20px;
@@ -259,10 +272,13 @@ a:hover { color: var(--secondary); }
 .main-content {
     margin-left: var(--sidebar-width);
     flex: 1;
-    min-height: 100vh;
+    height: 100vh; /* Fixed height to enable internal scrolling */
     display: flex;
     flex-direction: column;
+    overflow-y: auto; /* Enable scrolling */
+    overflow-x: hidden;
 }
+
 
 /* --- Header --- */
 .app-header {
@@ -1277,14 +1293,12 @@ dialog {
 }
 
 .brand-icon-lg {
-    width: 64px; height: 64px;
-    background: linear-gradient(135deg, var(--accent), var(--secondary));
-    border-radius: var(--radius-md);
+    width: 96px; height: 96px;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 28px; color: #fff;
-    box-shadow: 0 0 30px var(--accent-glow);
     animation: reveal-item 0.8s var(--ease-out-expo) forwards;
+    margin-bottom: 8px;
 }
+
 
 .landing-title {
     font-size: 72px;

@@ -22,7 +22,25 @@
     <!-- ========== LANDING PAGE OVERLAY ========== -->
     <div id="landing-overlay" class="landing-overlay">
         <div class="landing-content">
-            <div class="brand-icon-lg">O</div>
+            <div class="brand-icon-lg">
+                <svg viewBox="0 0 100 100" class="orbit-logo">
+                    <defs>
+                        <linearGradient id="orbit-grad-lg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="var(--accent)" />
+                            <stop offset="100%" stop-color="var(--secondary)" />
+                        </linearGradient>
+                        <filter id="glow-lg" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="4" result="blur"/>
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                        </filter>
+                    </defs>
+                    <ellipse cx="50" cy="50" rx="42" ry="18" fill="none" stroke="url(#orbit-grad-lg)" stroke-width="4" transform="rotate(-30 50 50)" filter="url(#glow-lg)" class="orbit-ring-1"/>
+                    <ellipse cx="50" cy="50" rx="42" ry="18" fill="none" stroke="url(#orbit-grad-lg)" stroke-width="3" transform="rotate(60 50 50)" opacity="0.7" class="orbit-ring-2"/>
+                    <circle cx="50" cy="50" r="14" fill="var(--bg-deep)" stroke="var(--accent)" stroke-width="4" filter="url(#glow-lg)"/>
+                    <circle cx="50" cy="50" r="6" fill="var(--secondary)" filter="url(#glow-lg)"/>
+                </svg>
+            </div>
+
             <h1 class="landing-title">OrbitPay</h1>
             <p class="landing-subtitle">The high-performance, on-chain dashboard built for the Stellar ecosystem.</p>
             
@@ -58,7 +76,21 @@
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <aside id="sidebar" class="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon">O</div>
+            <div class="brand-icon">
+                <svg viewBox="0 0 100 100" class="orbit-logo">
+                    <defs>
+                        <linearGradient id="orbit-grad-sm" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="var(--accent)" />
+                            <stop offset="100%" stop-color="var(--secondary)" />
+                        </linearGradient>
+                    </defs>
+                    <ellipse cx="50" cy="50" rx="42" ry="18" fill="none" stroke="url(#orbit-grad-sm)" stroke-width="6" transform="rotate(-30 50 50)" class="orbit-ring-1"/>
+                    <ellipse cx="50" cy="50" rx="42" ry="18" fill="none" stroke="url(#orbit-grad-sm)" stroke-width="5" transform="rotate(60 50 50)" opacity="0.7" class="orbit-ring-2"/>
+                    <circle cx="50" cy="50" r="16" fill="var(--bg-deep)" stroke="var(--accent)" stroke-width="5" />
+                    <circle cx="50" cy="50" r="8" fill="var(--secondary)" />
+                </svg>
+            </div>
+
             <div>
                 <h1>OrbitPay</h1>
             </div>
