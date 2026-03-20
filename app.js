@@ -19,19 +19,28 @@ const { Horizon, TransactionBuilder, Networks, Asset, Operation, StrKey } = Stel
 const HORIZON_URL = "https://horizon-testnet.stellar.org";
 const server = new Horizon.Server(HORIZON_URL);
 
+// --- Cache Keys ---
+const CACHE_KEYS = {
+    PUBKEY: "orbitpay_pubkey",
+    BALANCE: "orbitpay_balance",
+    TXS: "orbitpay_transactions"
+};
+
 // --- Application State ---
 const state = {
-    userPublicKey: null,
-    balance: "0.00",
+    userPublicKey: localStorage.getItem(CACHE_KEYS.PUBKEY),
+    balance: localStorage.getItem(CACHE_KEYS.BALANCE) || "0.00",
     isProcessing: false,
-    pollData: [], // Now fetched dynamically
+    isConnecting: false,
+    pollData: [],
     pollLoaded: false,
     votedOption: null,
-    transactions: [],
+    transactions: JSON.parse(localStorage.getItem(CACHE_KEYS.TXS) || "[]"),
     currentPage: "dashboard",
     lastPollUpdate: new Date(),
     unsubscribeEvents: null,
 };
+
 
 // --- DOM References ---
 const $ = (id) => document.getElementById(id);
@@ -42,18 +51,26 @@ const $ = (id) => document.getElementById(id);
 
 /** Bootstrap the entire application. */
 async function init() {
-    console.log("🚀 OrbitPay v2.0 initialized");
+    console.log("🚀 OrbitPay v3.0 (Orange Belt) initialized");
 
     initWalletKit();
     setupNavigation();
     setupEventListeners();
     
+    // Initial UI Update from Cache
+    updateUI();
+    if (state.transactions.length > 0) renderDashboardTx();
+
     // Initial Poll Load
     await refreshPollData();
     
+    // Refresh account data if already connected
+    if (state.userPublicKey) syncAccountData();
+
     fetchNetworkStats();
     setInterval(fetchNetworkStats, 15000);
 }
+
 
 // ======================================================
 //  NAVIGATION (Sidebar Router)
@@ -84,13 +101,25 @@ function navigateTo(page) {
 
     state.currentPage = page;
 
+    // Navigation UI updates
     document.querySelectorAll(".nav-item[data-page]").forEach((item) => {
         item.classList.toggle("active", item.dataset.page === page);
     });
 
-    document.querySelectorAll(".page-view").forEach((view) => {
-        view.classList.toggle("active", view.id === `page-${page}`);
+    const view = $(`page-${page}`);
+    document.querySelectorAll(".page-view").forEach((v) => {
+        v.classList.toggle("active", v === view);
     });
+
+    // Re-trigger staggered reveal animation
+    if (view) {
+        const sections = view.querySelectorAll(".content-section");
+        sections.forEach((sec, idx) => {
+            sec.style.animation = 'none';
+            sec.offsetHeight; // trigger reflow
+            sec.style.animation = `reveal-item 0.8s var(--ease-out-expo) ${idx * 0.1}s forwards`;
+        });
+    }
 
     const titles = { dashboard: "Dashboard", send: "Send XLM", poll: "Community Poll", history: "Transaction History", settings: "Settings" };
     $("page-title").textContent = titles[page] || "Dashboard";
@@ -109,6 +138,7 @@ function navigateTo(page) {
 
     if (page === "history" && state.userPublicKey) fetchTransactions();
 }
+
 
 function toggleMobileMenu() {
     $("sidebar")?.classList.toggle("open");
@@ -156,9 +186,16 @@ function updateUI() {
 // ======================================================
 
 async function handleConnect() {
+    if (state.isConnecting) return;
+    state.isConnecting = true;
+    const btn = $("connect-btn");
+    btn.classList.add("btn-loading");
+    
     try {
         const address = await connectWallet();
         state.userPublicKey = address;
+        localStorage.setItem(CACHE_KEYS.PUBKEY, address);
+        
         await syncAccountData();
         showToast("Wallet connected successfully!", "success");
         fetchTransactions();
@@ -166,18 +203,29 @@ async function handleConnect() {
         console.error("Connection error:", err);
         if (err?.code === -1 && err?.message?.includes("closed")) return;
         showToast(err?.message || "Failed to connect wallet", "error");
+    } finally {
+        state.isConnecting = false;
+        btn.classList.remove("btn-loading");
     }
 }
+
 
 function handleDisconnect() {
     disconnectWallet();
     state.userPublicKey = null;
     state.balance = "0.00";
     state.transactions = [];
+    
+    // Clear Cache
+    localStorage.removeItem(CACHE_KEYS.PUBKEY);
+    localStorage.removeItem(CACHE_KEYS.BALANCE);
+    localStorage.removeItem(CACHE_KEYS.TXS);
+
     updateUI();
     renderDashboardTx();
     showToast("Wallet disconnected", "info");
 }
+
 
 async function syncAccountData() {
     if (!state.userPublicKey) return;
@@ -185,6 +233,7 @@ async function syncAccountData() {
         const account = await server.loadAccount(state.userPublicKey);
         const native = account.balances.find((b) => b.asset_type === "native");
         state.balance = native ? native.balance : "0.00";
+        localStorage.setItem(CACHE_KEYS.BALANCE, state.balance);
     } catch (err) {
         console.error("Horizon error:", err);
         if (err?.response?.status === 404) {
@@ -193,6 +242,7 @@ async function syncAccountData() {
     }
     updateUI();
 }
+
 
 async function handleCopyAddress() {
     if (!state.userPublicKey) return;
@@ -242,6 +292,7 @@ async function handlePayment(e) {
             .setTimeout(TransactionBuilder.TIMEOUT_INFINITE)
             .build();
 
+        btn.classList.add("btn-loading");
         setBtnState(btn, true, "Waiting for Signature...");
         const signedXDR = await signTransaction(tx.toXDR());
 
@@ -256,9 +307,11 @@ async function handlePayment(e) {
         console.error("Tx Error:", err);
         showToast(`Transaction failed: ${err?.message || err}`, "error");
     } finally {
+        btn.classList.remove("btn-loading");
         setBtnState(btn, false);
     }
 }
+
 
 function setBtnState(btn, loading, text = "") {
     btn.disabled = loading;
@@ -373,6 +426,10 @@ window._vote = async (optionId) => {
     if (state.isProcessing) return;
     state.isProcessing = true;
 
+    // Visual feedback for the specific option
+    const optionEl = document.querySelector(`.poll-option[onclick*="'${optionId}'"]`);
+    if (optionEl) optionEl.classList.add("processing");
+
     showToast(`Preparing on-chain vote for ${optionId}...`, "info");
     
     try {
@@ -394,15 +451,16 @@ window._vote = async (optionId) => {
         } else if (msg.includes("timed out")) {
             showToast("Transaction timed out. Please try again.", "error");
         } else if (msg.includes("Already initialized")) {
-             // Panic from contract
             showToast("You have already voted on-chain!", "error");
         } else {
             showToast(`Vote failed: ${msg}`, "error");
         }
     } finally {
+        if (optionEl) optionEl.classList.remove("processing");
         state.isProcessing = false;
     }
-};
+}
+
 
 // ======================================================
 //  TRANSACTION HISTORY
@@ -431,8 +489,10 @@ async function fetchTransactions() {
                 };
             })
         );
+        localStorage.setItem(CACHE_KEYS.TXS, JSON.stringify(state.transactions));
         renderTransactionList(historyEl);
         renderDashboardTx();
+
     } catch (err) {
         console.error("History error:", err);
         historyEl.innerHTML = `<div class="empty-state"><p>Could not load transactions</p></div>`;
@@ -500,10 +560,8 @@ async function fetchNetworkStats() {
     }
 }
 
-// Add spin keyframe dynamically
-const style = document.createElement("style");
-style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
-document.head.appendChild(style);
+// initialization is handled by bootstrap init() call below
+
 
 // ======================================================
 //  BOOTSTRAP
