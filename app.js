@@ -62,10 +62,29 @@ async function init() {
         $("landing-overlay")?.classList.add("fade-out");
         triggerAppReveal();
     } else {
-        $("enter-app-btn")?.addEventListener("click", () => {
-            $("landing-overlay")?.classList.add("fade-out");
-            triggerAppReveal();
+        $("enter-app-btn")?.addEventListener("click", async () => {
+            const btn = $("enter-app-btn");
+            btn.classList.add("btn-loading");
+            try {
+                const address = await connectWallet();
+                state.userPublicKey = address;
+                localStorage.setItem(CACHE_KEYS.PUBKEY, address);
+                
+                await syncAccountData();
+                showToast("Wallet connected successfully!", "success");
+                fetchTransactions();
+
+                $("landing-overlay")?.classList.add("fade-out");
+                triggerAppReveal();
+            } catch (err) {
+                console.error("Connection error:", err);
+                if (err?.code === -1 && err?.message?.includes("closed")) return;
+                showToast(err?.message || "Failed to connect wallet", "error");
+            } finally {
+                btn.classList.remove("btn-loading");
+            }
         });
+
     }
 
     // Initial UI Update from Cache
