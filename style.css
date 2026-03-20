@@ -13,15 +13,50 @@
     --border: rgba(16, 185, 129, 0.12);
     --border-bright: rgba(16, 185, 129, 0.35);
     
+    /* Structural Backgrounds */
+    --bg-card: rgba(10, 12, 26, 0.8);
+    --bg-card-hover: rgba(15, 20, 35, 0.9);
+    --bg-sidebar: rgba(5, 6, 15, 0.95);
+    --bg-input: rgba(10, 12, 26, 0.5);
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+
+    /* Semantic Colors */
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --error: #ef4444;
+    --error-bg: rgba(239, 68, 68, 0.12);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.12);
+    --info: #3b82f6;
+    --info-bg: rgba(59, 130, 246, 0.12);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 30px var(--accent-glow);
+
+    
     /* Typography */
     --font-heading: 'Syne', sans-serif;
     --font-body: 'Manrope', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
+    /* Spacing & Structure (Restored) */
+    --sidebar-width: 260px;
+    --sidebar-collapsed: 72px;
+    --header-height: 64px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --duration: 250ms;
+
     /* Motion */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --stagger-delay: 0.1s;
 }
+
 
 /* --- Atmospheric Elements --- */
 .grid-mesh {
@@ -77,9 +112,9 @@ h1, h2, h3, .brand-logo, .nav-label {
 }
 
 /* App Layout Structure */
-}
 
 a { 
+
     color: var(--accent); 
     text-decoration: none; 
     transition: color 0.15s ease;
@@ -133,10 +168,12 @@ a:hover { color: var(--secondary); }
 .sidebar-brand h1 {
     font-size: 20px;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--text-primary), var(--accent-light));
+    background: linear-gradient(135deg, var(--text-primary), var(--accent));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
 
 .sidebar-brand .brand-badge {
     font-size: 10px; font-weight: 600;
