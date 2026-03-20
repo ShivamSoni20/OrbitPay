@@ -15,6 +15,7 @@
 ## ✨ Features (Level 3 Upgrade)
 
 | Feature | Description |
+
 |---|---|
 | 🔗 **Multi-Wallet Connect** | Freighter, xBull, Albedo, and Hana via Stellar Wallets Kit v2 |
 | 📊 **Community Poll** | Vote on-chain using a deployed Soroban smart contract |
@@ -37,7 +38,7 @@
 | **Network** | Stellar Testnet |
 | **Deploy TX Hash** | `099a579d80eb39a85ce78e9d601568cba1033bba2f090f47faba448a0651abe6` |
 | **Contract Call Hash**| `03845abf148f7fd6cc50900f2cfe82ba579f637fd646adb6fa7b37223d223344` |
-| **Demo Video** | [Watch 1-Minute Demo](Placeholder-Link-to-Video) |
+| **Demo Video** | [Watch 1-Minute Demo](https://www.youtube.com/watch?v=buPVz4kdLBg) |
 
 ---
 
@@ -100,16 +101,22 @@ npm run dev
 
 ## 📸 Screenshots
 
-### Dashboard & Loading States
+### Landing Page & Initialization Sequence
 <p align="center">
-  <img src="screenshots/dashboard-new.png" alt="OrbitPay Dashboard" width="800" style="border-radius: 8px;"/>
+  <img src="./assets/landing.png" alt="OrbitPay Landing Page Overlay" width="800" style="border-radius: 8px;"/>
 </p>
 
-### Automated Test Results
+### Authenticated Dashboard
 <p align="center">
-  <img src="screenshots/history.png" alt="Test Results Visualization" width="800" style="border-radius: 8px;"/>
+  <img src="./assets/dashboard.png" alt="Stellar Wallet Dashboard" width="800" style="border-radius: 8px;"/>
 </p>
-*Note: Replace with real test result screenshot for final submission.*
+
+### On-Chain Soroban Poll
+<p align="center">
+  <img src="./assets/poll.png" alt="Community On-Chain Voting" width="800" style="border-radius: 8px;"/>
+</p>
+
+
 
 ---
 
