@@ -38,7 +38,9 @@
 | **Poll Contract ID** | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
 | **OBT Token ID** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
 | **Network** | Stellar Testnet |
+| **Inter-contract Call** | `PollContract` calls `OrbitToken` to verify balance before voting |
 | **Demo Video** | [Watch Green Belt Demo](https://www.youtube.com/watch?v=buPVz4kdLBg) |
+
 
 
 ---
@@ -116,6 +118,12 @@ npm run dev
 <p align="center">
   <img src="./assets/poll.png" alt="Community On-Chain Voting" width="800" style="border-radius: 8px;"/>
 </p>
+
+### 📱 Mobile Responsive View (Green Belt)
+<p align="center">
+  <img src="./assets/mobile_view.png" alt="Mobile Responsive UI (375px)" width="375" style="border-radius: 12px; border: 4px solid #1e1e2e;"/>
+</p>
+
 
 
 
