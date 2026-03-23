@@ -142,6 +142,21 @@
         </div>
     </aside>
 
+    <!-- Mobile Mobile Toggle Style Fix -->
+    <style>
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 8px;
+        }
+        .mobile-toggle svg { width: 24px; height: 24px; }
+    </style>
+
+
     <!-- ========== MAIN ========== -->
     <main class="main-content">
 
@@ -200,7 +215,7 @@
                 <!-- Dashboard Content (shown when connected) -->
                 <div id="dashboard-content" class="hidden">
                     <div class="dashboard-grid">
-                        <!-- Balance Card -->
+                        <!-- XLM Card -->
                         <div class="card stat-card accent">
                             <div class="stat-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -208,6 +223,16 @@
                             <div class="stat-value" id="dash-balance">0.00</div>
                             <div class="stat-label">XLM Balance</div>
                         </div>
+
+                        <!-- OBT Card (Green Belt Addition) -->
+                        <div class="card stat-card success">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8"/><path d="M8 8l8 8"/></svg>
+                            </div>
+                            <div class="stat-value" id="dash-obt-balance">0.00</div>
+                            <div class="stat-label">OrbitToken (OBT)</div>
+                        </div>
+
 
                         <!-- Wallet Card -->
                         <div class="card stat-card cyan">
@@ -268,18 +293,32 @@
                     <div class="card-body">
                         <form id="payment-form">
                             <div class="form-group">
+                                <label class="form-label">Asset to Send</label>
+                                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                    <label style="flex:1; cursor:pointer;" class="asset-option">
+                                        <input type="radio" name="asset" value="xlm" checked style="display:none;" />
+                                        <div class="asset-card active" id="asset-xlm">XLM</div>
+                                    </label>
+                                    <label style="flex:1; cursor:pointer;" class="asset-option">
+                                        <input type="radio" name="asset" value="obt" style="display:none;" />
+                                        <div class="asset-card" id="asset-obt">OBT</div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="form-label" for="receiver">Recipient Address</label>
                                 <input class="form-input" type="text" id="receiver" placeholder="G..." autocomplete="off" required />
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="amount">Amount (XLM)</label>
+                                <label class="form-label" id="amount-label" for="amount">Amount (XLM)</label>
                                 <input class="form-input" type="number" id="amount" placeholder="0.00" step="0.0000001" min="0.0000001" required />
                             </div>
                             <button type="submit" class="btn-primary" id="send-btn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                                <span>Send XLM</span>
+                                <span id="send-btn-text">Send XLM</span>
                             </button>
                         </form>
+
                     </div>
                 </div>
             </div>

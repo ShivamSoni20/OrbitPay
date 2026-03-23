@@ -11,6 +11,8 @@ import { initWalletKit, connectWallet, disconnectWallet, signTransaction } from 
 import { showToast } from "./js/toast.js";
 import { truncateAddress, formatNumber, formatDate, copyToClipboard, showQRModal } from "./js/utils.js";
 import { getOptions, getAllVotes, castVote, subscribeToVoteEvents } from "./js/contract.js";
+import { getTokenBalance, transferToken, TOKEN_SYMBOL } from "./js/token.js";
+
 
 // --- Stellar SDK Destructuring ---
 const { Horizon, TransactionBuilder, Networks, Asset, Operation, StrKey } = StellarSdk;
@@ -23,13 +25,17 @@ const server = new Horizon.Server(HORIZON_URL);
 const CACHE_KEYS = {
     PUBKEY: "orbitpay_pubkey",
     BALANCE: "orbitpay_balance",
+    OBT_BALANCE: "orbitpay_obt_balance",
     TXS: "orbitpay_transactions"
 };
+
 
 // --- Application State ---
 const state = {
     userPublicKey: localStorage.getItem(CACHE_KEYS.PUBKEY),
     balance: localStorage.getItem(CACHE_KEYS.BALANCE) || "0.00",
+    obtBalance: localStorage.getItem(CACHE_KEYS.OBT_BALANCE) || "0.0000000",
+    selectedAsset: "xlm",
     isProcessing: false,
     isConnecting: false,
     pollData: [],
@@ -40,6 +46,8 @@ const state = {
     lastPollUpdate: new Date(),
     unsubscribeEvents: null,
 };
+
+
 
 
 // --- DOM References ---
@@ -179,7 +187,19 @@ function setupEventListeners() {
     $("payment-form")?.addEventListener("submit", handlePayment);
     $("copy-addr-btn")?.addEventListener("click", handleCopyAddress);
     $("qr-btn")?.addEventListener("click", () => showQRModal(state.userPublicKey));
+    $("mobile-menu-btn")?.addEventListener("click", toggleMobileMenu);
+    $("sidebar-overlay")?.addEventListener("click", toggleMobileMenu);
+
+    // Asset selection
+    const assets = document.getElementsByName("asset");
+    assets.forEach(radio => {
+        radio.addEventListener("change", (e) => {
+            state.selectedAsset = e.target.value;
+            updateAssetUI();
+        });
+    });
 }
+
 
 
 // ======================================================
@@ -198,12 +218,22 @@ function updateUI() {
         const truncated = truncateAddress(state.userPublicKey);
         $("wallet-address").textContent = truncated;
         $("wallet-balance").textContent = `${formatNumber(state.balance)} XLM`;
-        $("dash-balance").textContent = formatNumber(state.balance, 4);
+        $("dash-balance").textContent = formatNumber(state.balance);
+        $("dash-obt-balance").textContent = formatNumber(state.obtBalance, 7);
         $("dash-wallet").textContent = truncated;
+        $("dash-ledger").textContent = "Active";
     }
 
     const totalVotes = state.pollData.reduce((a, b) => a + b.votes, 0);
     $("dash-total-votes").textContent = totalVotes;
+}
+
+function updateAssetUI() {
+    const isXlm = state.selectedAsset === "xlm";
+    $("asset-xlm")?.classList.toggle("active", isXlm);
+    $("asset-obt")?.classList.toggle("active", !isXlm);
+    $("amount-label").textContent = `Amount (${isXlm ? 'XLM' : 'OBT'})`;
+    $("send-btn-text").textContent = `Send ${isXlm ? 'XLM' : 'OBT'}`;
 }
 
 // ======================================================
@@ -270,14 +300,16 @@ async function syncAccountData() {
         const native = account.balances.find((b) => b.asset_type === "native");
         state.balance = native ? native.balance : "0.00";
         localStorage.setItem(CACHE_KEYS.BALANCE, state.balance);
+
+        state.obtBalance = await getTokenBalance(state.userPublicKey);
+        localStorage.setItem(CACHE_KEYS.OBT_BALANCE, state.obtBalance);
     } catch (err) {
-        console.error("Horizon error:", err);
-        if (err?.response?.status === 404) {
-            showToast("Account not found on Testnet. Fund it via Friendbot.", "warning");
-        }
+        console.error("Sync error:", err);
     }
     updateUI();
 }
+
+
 
 
 async function handleCopyAddress() {
@@ -299,6 +331,7 @@ async function handlePayment(e) {
 
     const receiver = $("receiver").value.trim();
     const amount = $("amount").value.trim();
+    const isOBT = state.selectedAsset === "obt";
 
     if (!StrKey.isValidEd25519PublicKey(receiver)) {
         showToast("Invalid recipient address format", "error");
@@ -308,55 +341,93 @@ async function handlePayment(e) {
         showToast("Amount must be greater than zero", "error");
         return;
     }
-    if (parseFloat(amount) > parseFloat(state.balance)) {
-        showToast("Insufficient XLM balance", "error");
+
+    const currentBalance = isOBT ? state.obtBalance : state.balance;
+    if (parseFloat(amount) > parseFloat(currentBalance)) {
+        showToast(`Insufficient ${isOBT ? 'OBT' : 'XLM'} balance`, "error");
+        return;
+    }
+
+
+    const btn = $("send-btn");
+async function handlePayment(e) {
+    e.preventDefault();
+    if (!state.userPublicKey) {
+        showToast("Please connect your wallet first", "warning");
+        return;
+    }
+
+    const receiver = $("receiver").value.trim();
+    const amount = $("amount").value.trim();
+    const isOBT = state.selectedAsset === "obt";
+
+    if (!StrKey.isValidEd25519PublicKey(receiver)) {
+        showToast("Invalid recipient address format", "error");
+        return;
+    }
+    if (isNaN(amount) || parseFloat(amount) <= 0) {
+        showToast("Amount must be greater than zero", "error");
+        return;
+    }
+
+    const currentBalance = isOBT ? state.obtBalance : state.balance;
+    if (parseFloat(amount) > parseFloat(currentBalance)) {
+        showToast(`Insufficient ${isOBT ? 'OBT' : 'XLM'} balance`, "error");
         return;
     }
 
     const btn = $("send-btn");
-    setBtnState(btn, true, "Preparing...");
+    setBtnState(btn, true, `Preparing ${isOBT ? 'OBT' : 'XLM'}...`);
 
     try {
-        const sourceAccount = await server.loadAccount(state.userPublicKey);
-        const fee = await server.fetchBaseFee();
+        let hash;
+        if (isOBT) {
+            setBtnState(btn, true, "Running Token Transfer...");
+            hash = await transferToken(state.userPublicKey, receiver, amount, signTransaction);
+        } else {
+            const sourceAccount = await server.loadAccount(state.userPublicKey);
+            const fee = await server.fetchBaseFee();
+            setBtnState(btn, true, "Signing Transaction...");
 
-        const tx = new TransactionBuilder(sourceAccount, {
-            fee: fee.toString(),
-            networkPassphrase: Networks.TESTNET,
-        })
-            .addOperation(Operation.payment({ destination: receiver, asset: Asset.native(), amount: amount.toString() }))
-            .setTimeout(TransactionBuilder.TIMEOUT_INFINITE)
-            .build();
+            const tx = new TransactionBuilder(sourceAccount, {
+                fee: fee.toString(),
+                networkPassphrase: Networks.TESTNET,
+            })
+                .addOperation(Operation.payment({ destination: receiver, asset: Asset.native(), amount: amount.toString() }))
+                .setTimeout(TransactionBuilder.TIMEOUT_INFINITE)
+                .build();
 
-        btn.classList.add("btn-loading");
-        setBtnState(btn, true, "Waiting for Signature...");
-        const signedXDR = await signTransaction(tx.toXDR());
+            const signedXDR = await signTransaction(tx.toXDR());
+            setBtnState(btn, true, "Broadcasting...");
+            const response = await server.submitTransaction(TransactionBuilder.fromXDR(signedXDR, Networks.TESTNET));
+            hash = response.hash;
+        }
 
-        setBtnState(btn, true, "Broadcasting...");
-        const result = await server.submitTransaction(TransactionBuilder.fromXDR(signedXDR, Networks.TESTNET));
-
-        showToast(`Sent ${amount} XLM! <a href="https://stellar.expert/explorer/testnet/tx/${result.hash}" target="_blank" style="color:#818cf8">View on Explorer</a>`, "success", 6000);
+        showToast(`${isOBT ? 'OBT' : 'XLM'} sent successfully!`, "success");
         $("payment-form").reset();
         await syncAccountData();
-        fetchTransactions();
+        addLocalTx(hash, isOBT ? `Sent ${amount} OBT` : `Sent ${amount} XLM`, "sent", amount);
     } catch (err) {
-        console.error("Tx Error:", err);
-        showToast(`Transaction failed: ${err?.message || err}`, "error");
+        console.error("Payment error:", err);
+        showToast(err.message || "Payment failed", "error");
     } finally {
-        btn.classList.remove("btn-loading");
         setBtnState(btn, false);
+        btn.classList.remove("btn-loading");
     }
 }
+
 
 
 function setBtnState(btn, loading, text = "") {
     btn.disabled = loading;
+    const isOBT = state.selectedAsset === "obt";
     if (loading) {
         btn.innerHTML = `<div class="loading" style="display:flex;align-items:center;gap:8px"><div class="loader" style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>${text}</div>`;
     } else {
-        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Send XLM</span>`;
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Send ${isOBT ? 'OBT' : 'XLM'}</span>`;
     }
 }
+
 
 // ======================================================
 //  COMMUNITY POLL (ON-CHAIN)

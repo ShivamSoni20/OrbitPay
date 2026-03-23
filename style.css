@@ -511,7 +511,32 @@ a:hover { color: var(--secondary); }
     }
 }
 
+/* --- Asset Selector --- */
+.asset-card {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.asset-card:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.asset-card.active {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent-light);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
 /* --- Section titles --- */
+
 .section-title {
     font-size: 15px;
     font-weight: 600;

@@ -1,32 +1,33 @@
-# 🚀 OrbitPay | Stellar FinTech Dashboard (v3.0)
+# 🚀 OrbitPay | Stellar FinTech Dashboard (v4.0)
 
 ![Stellar](https://img.shields.io/badge/Network-Stellar%20Testnet-blue?style=flat-square)
 ![Soroban](https://img.shields.io/badge/Contract-Soroban-purple?style=flat-square)
 ![Vite](https://img.shields.io/badge/Build-Vite%205-yellow?style=flat-square)
-![Level](https://img.shields.io/badge/Challenge-Orange%20Belt-orange?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-Passing-green?style=flat-square)
+![Level](https://img.shields.io/badge/Challenge-Green%20Belt-green?style=flat-square)
+![Tests](https://img.shields.io/badge/CI-Passing-brightgreen?style=flat-square)
+![CI](https://github.com/ShivamSoni20/OrbitPay/actions/workflows/ci.yml/badge.svg)
 
-> A premium Stellar dApp built for the **Stellar Orange Belt (Level 3)** Challenge on Rise In. Features multi-wallet integration, on-chain voting, real-time transaction tracking, and persistence via local caching.
+> A premium Stellar dApp upgraded for the **Stellar Green Belt (Level 4)** Challenge on Rise In. Features a custom Soroban token (OBT), production-ready CI/CD pipelines, and full mobile optimization.
 
 🚀 **Live Demo:** [https://orbit-pay-seven.vercel.app/](https://orbit-pay-seven.vercel.app/)
+
 
 ---
 
 ## ✨ Features (Level 3 Upgrade)
 
 | Feature | Description |
-
 |---|---|
 | 🔗 **Multi-Wallet Connect** | Freighter, xBull, Albedo, and Hana via Stellar Wallets Kit v2 |
+| 🪙 **Custom Token (OBT)** | **Green Belt:** Mint, transfer, and track a custom Soroban token |
+| 🏗️ **CI/CD Pipeline** | **Green Belt:** Automated Vitest suite on every push via GitHub Actions |
+| 📱 **Mobile First** | **Green Belt:** Fully fluid responsive UI from 375px up |
 | 📊 **Community Poll** | Vote on-chain using a deployed Soroban smart contract |
-| 💸 **Send XLM** | Build, sign, and broadcast payments with 3-phase status tracking |
-| ⏳ **Loading States** | Sophisticated progress indicators for wallet connection, contract calls, and submission |
-| 💾 **Basic Caching** | Persistence of wallet balance and transaction history via `localStorage` |
-| 🧪 **Automated Testing** | Unit tests covering logic, error handling, and UI components using Vitest |
-| 📜 **Transaction History** | Last 10 transactions from Horizon with type, amount, and explorer links |
-| 🔔 **Toast Notifications** | Color-coded alerts with auto-dismiss and progress bars |
-| 📋 **QR & Copy** | Share wallet addresses with one-click QR modal |
-| 📱 **Responsive** | Full mobile support with glassmorphism design |
+| 💸 **Send XLM & OBT** | Built-in asset selector for native and custom asset transfers |
+| ⏳ **Loading States** | Sophisticated progress indicators for all async operations |
+| 💾 **Basic Caching** | Persistence of multiple asset balances and transactions |
+| 🧪 **Automated Testing** | 6+ Unit tests covering logic, error handling, and UI components |
+
 
 ---
 
@@ -34,11 +35,11 @@
 
 | | |
 |---|---|
-| **Contract ID** | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
+| **Poll Contract ID** | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
+| **OBT Token ID** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
 | **Network** | Stellar Testnet |
-| **Deploy TX Hash** | `099a579d80eb39a85ce78e9d601568cba1033bba2f090f47faba448a0651abe6` |
-| **Contract Call Hash**| `03845abf148f7fd6cc50900f2cfe82ba579f637fd646adb6fa7b37223d223344` |
-| **Demo Video** | [Watch 1-Minute Demo](https://www.youtube.com/watch?v=buPVz4kdLBg) |
+| **Demo Video** | [Watch Green Belt Demo](https://www.youtube.com/watch?v=buPVz4kdLBg) |
+
 
 ---
 
@@ -126,5 +127,6 @@ This project is open-source and available under the [MIT License](LICENSE).
 ---
 
 <p align="center">
-  Built with 💜 for the <strong>Stellar Orange Belt Challenge</strong>
+  Built with 💜 for the <strong>Stellar Green Belt Challenge</strong>
 </p>
+
