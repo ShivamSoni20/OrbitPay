@@ -272,12 +272,14 @@ a:hover { color: var(--secondary); }
 .main-content {
     margin-left: var(--sidebar-width);
     flex: 1;
-    height: 100vh; /* Fixed height to enable internal scrolling */
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Enable scrolling */
+    overflow-y: auto;
     overflow-x: hidden;
+    transition: margin-left 0.3s var(--ease);
 }
+
 
 
 /* --- Header --- */
@@ -429,6 +431,84 @@ a:hover { color: var(--secondary); }
 @keyframes fadeSlideIn {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 992px) {
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+        z-index: 90;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .mobile-toggle {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-title {
+        font-size: 42px;
+    }
+
+    .landing-stats {
+        gap: 20px;
+        flex-direction: column;
+    }
+
+    .app-header {
+        padding: 0 16px;
+    }
+
+    .header-right .network-badge {
+        display: none;
+    }
+
+    .card {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-title {
+        font-size: 32px;
+    }
+    
+    .brand-icon-lg {
+        width: 64px; height: 64px;
+    }
 }
 
 /* --- Section titles --- */
