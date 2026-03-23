@@ -1,0 +1,39 @@
+name: CI — OrbitPay Test Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Vitest Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: stellar-payment-dapp/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: stellar-payment-dapp
+
+      - name: Run test suite
+        run: npm run test -- --run
+        working-directory: stellar-payment-dapp
+
+      - name: Upload test results (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: stellar-payment-dapp/test-results/
+          if-no-files-found: ignore
