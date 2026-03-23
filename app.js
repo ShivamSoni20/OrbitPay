@@ -403,7 +403,12 @@ async function handlePayment(e) {
             hash = response.hash;
         }
 
-        showToast(`${isOBT ? 'OBT' : 'XLM'} sent successfully!`, "success");
+        showToast(
+            `Sent ${amount} ${isOBT ? 'OBT' : 'XLM'}! <a href="https://stellar.expert/explorer/testnet/tx/${hash}" target="_blank" style="color:#818cf8; text-decoration: underline;">View on Explorer</a>`, 
+            "success", 
+            6000
+        );
+
         $("payment-form").reset();
         await syncAccountData();
         addLocalTx(hash, isOBT ? `Sent ${amount} OBT` : `Sent ${amount} XLM`, "sent", amount);
