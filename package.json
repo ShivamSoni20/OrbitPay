@@ -13,9 +13,9 @@
     "@creit.tech/stellar-wallets-kit": "^2.0.1",
     "@stellar/freighter-api": "^2.0.0",
     "@stellar/stellar-sdk": "^13.3.0",
-    "qrcode": "^1.5.4",
-    "stellar-sdk": "^13.0.0"
+    "qrcode": "^1.5.4"
   },
+
   "devDependencies": {
     "vite": "^5.0.0",
     "vite-plugin-node-polyfills": "^0.25.0",

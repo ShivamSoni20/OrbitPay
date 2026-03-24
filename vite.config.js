@@ -7,7 +7,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          stellar: ["stellar-sdk", "@stellar/stellar-sdk"],
+          stellar: ["@stellar/stellar-sdk"],
           wallets: ["@creit.tech/stellar-wallets-kit", "@stellar/freighter-api"]
         }
       }

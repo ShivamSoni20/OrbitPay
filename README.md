@@ -124,6 +124,12 @@ npm run dev
   <img src="./assets/mobile_view.png" alt="Mobile Responsive UI (375px)" width="375" style="border-radius: 12px; border: 4px solid #1e1e2e;"/>
 </p>
 
+### ✅ CI Pipeline Passing (Green Belt)
+<p align="center">
+  <img src="./assets/ci_passing.png" alt="CI/CD GitHub Actions Passing" width="800" style="border-radius: 8px;"/>
+</p>
+
+
 
 
 

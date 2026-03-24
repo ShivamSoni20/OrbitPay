@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { getTokenBalance, rpcServer } from '../js/token.js';
-import * as StellarSdk from 'stellar-sdk';
+import * as StellarSdk from '@stellar/stellar-sdk';
 
 // Force mock stellar-sdk
-vi.mock('stellar-sdk', () => {
+vi.mock('@stellar/stellar-sdk', () => {
     const mockRpc = {
         Server: vi.fn().mockImplementation(() => ({
             simulateTransaction: vi.fn().mockResolvedValue({

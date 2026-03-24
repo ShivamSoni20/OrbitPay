@@ -6,7 +6,8 @@
  * network stats, navigation, and the toast notification system.
  */
 
-import * as StellarSdk from "stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
+
 import { initWalletKit, connectWallet, disconnectWallet, signTransaction } from "./js/wallet.js";
 import { showToast } from "./js/toast.js";
 import { truncateAddress, formatNumber, formatDate, copyToClipboard, showQRModal } from "./js/utils.js";

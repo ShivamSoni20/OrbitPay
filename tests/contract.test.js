@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 // Mock StellarSdk before importing contract.js
-vi.mock("stellar-sdk", async (importOriginal) => {
+vi.mock("@stellar/stellar-sdk", async (importOriginal) => {
     const original = await importOriginal();
     return {
         ...original,

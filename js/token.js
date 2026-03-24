@@ -3,7 +3,7 @@
  * @module token
  */
 
-import * as StellarSdk from "stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
 const {
     rpc,
