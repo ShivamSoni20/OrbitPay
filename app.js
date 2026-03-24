@@ -266,8 +266,10 @@ async function handleConnect(btnId = "connect-btn") {
             triggerAppReveal();
         }
     } catch (err) {
+        if (err?.code === -1 && err?.message?.includes("closed")) {
+            return; // Ignore user intentionally closing modal
+        }
         console.error("Connection error:", err);
-        if (err?.code === -1 && err?.message?.includes("closed")) return;
         showToast(err?.message || "Failed to connect wallet", "error");
     } finally {
         state.isConnecting = false;

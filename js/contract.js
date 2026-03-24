@@ -45,7 +45,6 @@ export async function getOptions() {
         const response = await rpcServer.simulateTransaction(tx);
 
         if (rpc.Api.isSimulationError(response)) {
-            console.error("Simulation error (get_options):", response.error);
             return ["Tokens", "NFTs", "DeFi"];
         }
 
@@ -57,7 +56,6 @@ export async function getOptions() {
 
         return ["Tokens", "NFTs", "DeFi"];
     } catch (err) {
-        console.error("Error fetching options:", err);
         return ["Tokens", "NFTs", "DeFi"];
     }
 }
@@ -75,7 +73,6 @@ export async function getVotes(option) {
         const response = await rpcServer.simulateTransaction(tx);
 
         if (rpc.Api.isSimulationError(response)) {
-            console.error(`Simulation error (get_votes ${option}):`, response.error);
             return 0;
         }
 
@@ -85,7 +82,6 @@ export async function getVotes(option) {
         }
         return 0;
     } catch (err) {
-        console.error(`Error fetching votes for ${option}:`, err);
         return 0;
     }
 }

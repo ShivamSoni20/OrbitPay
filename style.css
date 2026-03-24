@@ -479,9 +479,7 @@ a:hover { color: var(--secondary); }
         grid-template-columns: 1fr;
     }
 
-    .landing-title {
-        font-size: 42px;
-    }
+
 
     .landing-stats {
         gap: 20px;
@@ -502,9 +500,7 @@ a:hover { color: var(--secondary); }
 }
 
 @media (max-width: 480px) {
-    .landing-title {
-        font-size: 32px;
-    }
+
     
     .brand-icon-lg {
         width: 64px; height: 64px;
@@ -1393,9 +1389,13 @@ dialog {
 .landing-content {
     text-align: center;
     max-width: 640px;
+    width: 100%;
+    padding: 0 24px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-x: hidden;
 }
 
 .landing-content > * {
@@ -1412,30 +1412,38 @@ dialog {
 
 
 .landing-title {
-    font-size: 72px;
+    font-size: clamp(32px, 10vw, 72px);
     line-height: 1.1;
     margin-top: 24px;
     letter-spacing: -0.05em;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
     background: linear-gradient(135deg, var(--text-primary), var(--accent));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: reveal-item 1s var(--ease-out-expo) forwards;
+    word-break: break-all;
+    max-width: 100%;
 }
 
 .landing-subtitle {
-    font-size: 20px;
+    font-size: clamp(16px, 4vw, 20px);
     color: var(--text-secondary);
     margin-top: 16px;
     font-weight: 400;
     line-height: 1.5;
     animation: reveal-item 1.2s var(--ease-out-expo) forwards;
+    max-width: 100%;
 }
 
 .landing-stats {
     display: flex;
-    gap: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(16px, 5vw, 48px);
     margin-top: 40px;
+    width: 100%;
     animation: reveal-item 1.4s var(--ease-out-expo) forwards;
 }
 
