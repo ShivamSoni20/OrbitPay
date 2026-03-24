@@ -301,7 +301,9 @@ async function syncAccountData() {
         state.balance = native ? native.balance : "0.00";
         localStorage.setItem(CACHE_KEYS.BALANCE, state.balance);
 
-        state.obtBalance = await getTokenBalance(state.userPublicKey);
+        // OrbitToken Balance Fetch
+        const oBalance = await getTokenBalance(state.userPublicKey);
+        state.obtBalance = oBalance;
         localStorage.setItem(CACHE_KEYS.OBT_BALANCE, state.obtBalance);
     } catch (err) {
         console.error("Sync error:", err);
@@ -350,34 +352,8 @@ async function handlePayment(e) {
 
 
     const btn = $("send-btn");
-async function handlePayment(e) {
-    e.preventDefault();
-    if (!state.userPublicKey) {
-        showToast("Please connect your wallet first", "warning");
-        return;
-    }
-
-    const receiver = $("receiver").value.trim();
-    const amount = $("amount").value.trim();
-    const isOBT = state.selectedAsset === "obt";
-
-    if (!StrKey.isValidEd25519PublicKey(receiver)) {
-        showToast("Invalid recipient address format", "error");
-        return;
-    }
-    if (isNaN(amount) || parseFloat(amount) <= 0) {
-        showToast("Amount must be greater than zero", "error");
-        return;
-    }
-
-    const currentBalance = isOBT ? state.obtBalance : state.balance;
-    if (parseFloat(amount) > parseFloat(currentBalance)) {
-        showToast(`Insufficient ${isOBT ? 'OBT' : 'XLM'} balance`, "error");
-        return;
-    }
-
-    const btn = $("send-btn");
     setBtnState(btn, true, `Preparing ${isOBT ? 'OBT' : 'XLM'}...`);
+
 
     try {
         let hash;
