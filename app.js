@@ -107,6 +107,7 @@ function setupNavigation() {
 
     $("mobile-menu-btn")?.addEventListener("click", toggleMobileMenu);
     $("sidebar-overlay")?.addEventListener("click", toggleMobileMenu);
+    $("close-sidebar-btn")?.addEventListener("click", toggleMobileMenu);
 }
 
 function navigateTo(page) {

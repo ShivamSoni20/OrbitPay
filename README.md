@@ -39,6 +39,7 @@
 | **OBT Token ID** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
 | **Network** | Stellar Testnet |
 | **Inter-contract Call** | `PollContract` calls `OrbitToken` to verify balance before voting |
+| **Interop Tx Hash** | [`dcda3ed8863dce...7f90a550a6`](https://stellar.expert/explorer/testnet/tx/dcda3ed8863dce83f4e54ec92c0b7066f92be7ed257ac05e73b7897f90a550a6) |
 | **Demo Video** | [Watch Green Belt Demo](https://www.youtube.com/watch?v=buPVz4kdLBg) |
 
 
