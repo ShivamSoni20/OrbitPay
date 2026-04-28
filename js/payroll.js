@@ -6,15 +6,15 @@ const {
     TransactionBuilder,
     Networks,
     Keypair,
-    Operation,
     Account,
+    Contract,
     nativeToScVal,
     scValToNative,
     Address,
 } = StellarSdk;
 
 export const PAYROLL_CONTRACT_ID = "CCIWIPCHBABIXHAPJWDTMVNPLU2OSOKQ4NYHHHWR7HKLYAUMPACYWNNH";
-export const XLM_SAC_CONTRACT_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3";
+export const XLM_SAC_CONTRACT_ID = StellarSdk.Asset.native().contractId(Networks.TESTNET);
 export const PAYROLL_STORAGE_KEY = "orbitpay_payroll_streams";
 
 const RPC_URL = "https://soroban-testnet.stellar.org";
@@ -22,6 +22,7 @@ const HORIZON_URL = "https://horizon-testnet.stellar.org";
 const SIM_SOURCE = Keypair.random().publicKey();
 
 export const payrollRpcServer = new rpc.Server(RPC_URL);
+let cachedPayrollContract;
 
 export function validatePayrollStream({ recipient, amount, durationDays }) {
     const errors = {};
@@ -139,7 +140,7 @@ async function invokePayroll(publicKey, fn, args, signFn) {
     const sourceAccount = new Account(publicKey, accountData.sequence);
 
     let tx = new TransactionBuilder(sourceAccount, { fee: "100000", networkPassphrase: Networks.TESTNET })
-        .addOperation(Operation.invokeContractFunction({ contract: PAYROLL_CONTRACT_ID, function: fn, args }))
+        .addOperation(getPayrollContract().call(fn, ...args))
         .setTimeout(30)
         .build();
 
@@ -173,9 +174,20 @@ async function invokePayroll(publicKey, fn, args, signFn) {
 
 function buildViewTx(fn, args = []) {
     return new TransactionBuilder(new Account(SIM_SOURCE, "0"), { fee: "100", networkPassphrase: Networks.TESTNET })
-        .addOperation(Operation.invokeContractFunction({ contract: PAYROLL_CONTRACT_ID, function: fn, args }))
+        .addOperation(getPayrollContract().call(fn, ...args))
         .setTimeout(30)
         .build();
+}
+
+function getPayrollContract() {
+    if (!cachedPayrollContract) {
+        try {
+            cachedPayrollContract = new Contract(PAYROLL_CONTRACT_ID);
+        } catch (err) {
+            throw new Error(`Invalid payroll contract ID: ${PAYROLL_CONTRACT_ID}`);
+        }
+    }
+    return cachedPayrollContract;
 }
 
 function toTokenUnits(amount) {

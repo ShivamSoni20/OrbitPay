@@ -78,7 +78,7 @@ sequenceDiagram
 
 | Contract | Purpose | Address |
 |---|---|---|
-| OBT TokenContract | Custom OrbitToken mint, balance, and transfer operations | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
+| OBT TokenContract | Custom OrbitToken mint, balance, and transfer operations | `CDPDVYCGGNEDQYJRM3NJH5PUOI4YRTD2C5CEW6AHIJMPEOK43LWO262Q` |
 | PollContract | Existing on-chain voting with OBT balance gate | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
 | PayrollContract | Streaming payroll, claim, pause, resume, cancel, and token transfers | `CCIWIPCHBABIXHAPJWDTMVNPLU2OSOKQ4NYHHHWR7HKLYAUMPACYWNNH` |
 

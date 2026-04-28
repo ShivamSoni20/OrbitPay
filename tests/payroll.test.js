@@ -1,6 +1,7 @@
+import * as StellarSdk from "@stellar/stellar-sdk";
 import { describe, expect, it } from "vitest";
 import { mintToken } from "../js/token.js";
-import { getClaimButtonState, validatePayrollStream } from "../js/payroll.js";
+import { XLM_SAC_CONTRACT_ID, getClaimButtonState, validatePayrollStream } from "../js/payroll.js";
 
 describe("Level 5 Payroll and Faucet Tests", () => {
     it("mint faucet function rejects when no wallet is connected", async () => {
@@ -18,6 +19,13 @@ describe("Level 5 Payroll and Faucet Tests", () => {
         expect(result.errors.recipient).toBeTruthy();
         expect(result.errors.amount).toBeTruthy();
         expect(result.errors.durationDays).toBeTruthy();
+    });
+
+    it("uses the Stellar testnet native asset contract ID for XLM payroll streams", () => {
+        const expected = StellarSdk.Asset.native().contractId(StellarSdk.Networks.TESTNET);
+
+        expect(XLM_SAC_CONTRACT_ID).toBe(expected);
+        expect(StellarSdk.StrKey.isValidContract(XLM_SAC_CONTRACT_ID)).toBe(true);
     });
 
     it("claim button UI state is disabled when claimable amount is 0", () => {
