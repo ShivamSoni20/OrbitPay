@@ -73,10 +73,11 @@ Add one completed iteration after user feedback. Include commit links when the c
 | Network | Stellar Testnet |
 | Poll Contract ID | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
 | OBT Token Contract ID | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
-| Payroll Contract ID | `PAYROLL_CONTRACT_ID_PENDING_DEPLOYMENT` |
+| Payroll Contract ID | `CCIWIPCHBABIXHAPJWDTMVNPLU2OSOKQ4NYHHHWR7HKLYAUMPACYWNNH` |
 | OBT Faucet Mint Tx | `PASTE_TX_HASH_AFTER_MINT` |
-| Payroll Contract Deploy Tx | `PASTE_DEPLOY_TX_HASH` |
-| Payroll Stream Create Tx | `PASTE_CREATE_STREAM_TX_HASH` |
+| Payroll Contract Deploy Tx | `86aed8563e4f8b148eddbc8445b4cddc8e0e3965d95e5c90b658a98f29f64381` |
+| Payroll Contract Initialize Tx | `33328a4e288bf3c64e55e43a030b342495224ee643e1e2ac072bd37d8664960d` |
+| Payroll Stream Create Tx | `ccd4ba7b35adae5f5da910c753f0f0cc775c3cce04a0f5b60a75affb0e4b16a2` |
 | Payroll Claim Tx | `PASTE_CLAIM_TX_HASH` |
 
 ## Setup
@@ -121,7 +122,7 @@ stellar contract invoke \
   --admin <ADMIN_PUBLIC_KEY>
 ```
 
-After deployment, update `PAYROLL_CONTRACT_ID` in `js/payroll.js`, then add the deployment address and transaction hashes above.
+The current PayrollContract deployment is already configured in `js/payroll.js`. Redeploying requires replacing that ID and updating the transaction hash table above.
 
 ## Project Structure
 
