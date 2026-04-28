@@ -21,6 +21,7 @@ export const TOKEN_CONTRACT_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQ
 export const TOKEN_SYMBOL = "OBT";
 export const TOKEN_NAME = "OrbitToken";
 export const TOKEN_DECIMALS = 7; 
+export const FAUCET_MINT_AMOUNT = "1000";
 
 const RPC_URL = "https://soroban-testnet.stellar.org";
 const HORIZON_URL = "https://horizon-testnet.stellar.org";
@@ -112,6 +113,65 @@ export async function transferToken(fromKey, toKey, amount, signFn) {
         iterations++;
     }
     if (status === "PENDING") throw new Error("Token transfer timed out.");
+    return txHash;
+}
+
+export async function mintToken(recipientKey, amount = FAUCET_MINT_AMOUNT, signFn) {
+    if (!recipientKey) {
+        throw new Error("Connect your wallet before minting OBT.");
+    }
+    if (!signFn) {
+        throw new Error("Wallet signer is not available.");
+    }
+
+    const stroops = BigInt(Math.round(Number(amount) * Math.pow(10, TOKEN_DECIMALS)));
+    if (stroops <= 0n) {
+        throw new Error("Mint amount must be greater than zero.");
+    }
+
+    const accountRes = await fetch(`${HORIZON_URL}/accounts/${recipientKey}`);
+    if (!accountRes.ok) throw new Error("Account not found. Please fund it via Friendbot first.");
+    const accountData = await accountRes.json();
+    const sourceAccount = new Account(recipientKey, accountData.sequence);
+
+    const recipientScVal = nativeToScVal(new Address(recipientKey), { type: "address" });
+    const amountScVal = nativeToScVal(stroops, { type: "i128" });
+
+    let tx = new TransactionBuilder(sourceAccount, { fee: "100000", networkPassphrase: Networks.TESTNET })
+        .addOperation(Operation.invokeContractFunction({ contract: TOKEN_CONTRACT_ID, function: "mint", args: [recipientScVal, amountScVal] }))
+        .setTimeout(30)
+        .build();
+
+    const simulation = await rpcServer.simulateTransaction(tx);
+    if (rpc.Api.isSimulationError(simulation)) {
+        const errMsg = simulation.error?.message || simulation.error || "Simulation failed";
+        if (String(errMsg).toLowerCase().includes("not authorized")) {
+            throw new Error("Unauthorized caller. The connected wallet must be the OBT token admin.");
+        }
+        throw new Error(`OBT mint simulation failed: ${errMsg}`);
+    }
+
+    tx = rpc.assembleTransaction(tx, simulation).build();
+    const signedXDR = await signFn(tx.toXDR());
+    const signedTx = TransactionBuilder.fromXDR(signedXDR, Networks.TESTNET);
+    const response = await rpcServer.sendTransaction(signedTx);
+
+    if (response.status === "ERROR") {
+        throw new Error(response.errorResult?.message || "OBT mint submission failed.");
+    }
+
+    const txHash = response.hash;
+    let status = response.status;
+    let iterations = 0;
+    while (status === "PENDING" && iterations < 20) {
+        await sleep(2000);
+        const txResponse = await rpcServer.getTransaction(txHash);
+        status = txResponse.status;
+        if (status === "SUCCESS") return txHash;
+        if (status === "FAILED") throw new Error("OBT mint failed on-chain.");
+        iterations++;
+    }
+    if (status === "PENDING") throw new Error("OBT mint timed out.");
     return txHash;
 }
 
