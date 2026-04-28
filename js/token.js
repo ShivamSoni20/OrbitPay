@@ -10,14 +10,14 @@ const {
     TransactionBuilder,
     Networks,
     Keypair,
-    Operation,
     Account,
+    Contract,
     nativeToScVal,
     scValToNative,
     Address,
 } = StellarSdk;
 
-export const TOKEN_CONTRACT_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3";
+export const TOKEN_CONTRACT_ID = "CBSLDL2VMD3Z4Q5MXM6KSAR5NAYYGKUM7GE5LDAKZ2QHRI2AZTB3Y6ON";
 export const TOKEN_SYMBOL = "OBT";
 export const TOKEN_NAME = "OrbitToken";
 export const TOKEN_DECIMALS = 7; 
@@ -30,6 +30,7 @@ const HORIZON_URL = "https://horizon-testnet.stellar.org";
 export const rpcServer = new rpc.Server(RPC_URL);
 
 const SIM_SOURCE = Keypair.random().publicKey();
+let cachedTokenContract;
 
 export async function getTokenBalance(publicKey) {
     try {
@@ -79,7 +80,7 @@ export async function transferToken(fromKey, toKey, amount, signFn) {
     const amountScVal = nativeToScVal(stroops, { type: "i128" });
 
     let tx = new TransactionBuilder(sourceAccount, { fee: "100000", networkPassphrase: Networks.TESTNET })
-        .addOperation(Operation.invokeContractFunction({ contract: TOKEN_CONTRACT_ID, function: "transfer", args: [fromScVal, toScVal, amountScVal] }))
+        .addOperation(getTokenContract().call("transfer", fromScVal, toScVal, amountScVal))
         .setTimeout(30).build();
 
     const simulation = await rpcServer.simulateTransaction(tx);
@@ -138,7 +139,7 @@ export async function mintToken(recipientKey, amount = FAUCET_MINT_AMOUNT, signF
     const amountScVal = nativeToScVal(stroops, { type: "i128" });
 
     let tx = new TransactionBuilder(sourceAccount, { fee: "100000", networkPassphrase: Networks.TESTNET })
-        .addOperation(Operation.invokeContractFunction({ contract: TOKEN_CONTRACT_ID, function: "mint", args: [recipientScVal, amountScVal] }))
+        .addOperation(getTokenContract().call("mint", recipientScVal, amountScVal))
         .setTimeout(30)
         .build();
 
@@ -177,8 +178,19 @@ export async function mintToken(recipientKey, amount = FAUCET_MINT_AMOUNT, signF
 
 function buildViewTx(fn, args = []) {
     return new TransactionBuilder(new Account(SIM_SOURCE, "0"), { fee: "100", networkPassphrase: Networks.TESTNET })
-        .addOperation(Operation.invokeContractFunction({ contract: TOKEN_CONTRACT_ID, function: fn, args }))
+        .addOperation(getTokenContract().call(fn, ...args))
         .setTimeout(30).build();
+}
+
+function getTokenContract() {
+    if (!cachedTokenContract) {
+        try {
+            cachedTokenContract = new Contract(TOKEN_CONTRACT_ID);
+        } catch (err) {
+            throw new Error(`Invalid OBT token contract ID: ${TOKEN_CONTRACT_ID}`);
+        }
+    }
+    return cachedTokenContract;
 }
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
