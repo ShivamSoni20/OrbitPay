@@ -1,146 +1,169 @@
-# 🚀 OrbitPay | Stellar FinTech Dashboard (v4.0)
+# OrbitPay Pro | Decentralized Payroll on Stellar
 
 ![Stellar](https://img.shields.io/badge/Network-Stellar%20Testnet-blue?style=flat-square)
-![Soroban](https://img.shields.io/badge/Contract-Soroban-purple?style=flat-square)
+![Soroban](https://img.shields.io/badge/Contracts-Soroban-purple?style=flat-square)
 ![Vite](https://img.shields.io/badge/Build-Vite%205-yellow?style=flat-square)
-![Level](https://img.shields.io/badge/Challenge-Green%20Belt-green?style=flat-square)
-![Tests](https://img.shields.io/badge/CI-Passing-brightgreen?style=flat-square)
-![CI](https://github.com/ShivamSoni20/OrbitPay/actions/workflows/ci.yml/badge.svg)
+![Level](https://img.shields.io/badge/Challenge-Blue%20Belt%20Level%205-blue?style=flat-square)
+![Tests](https://img.shields.io/badge/Vitest-9%2B%20tests-brightgreen?style=flat-square)
 
-> A premium Stellar dApp upgraded for the **Stellar Green Belt (Level 4)** Challenge on Rise In. Features a custom Soroban token (OBT), production-ready CI/CD pipelines, and full mobile optimization.
+OrbitPay Pro is a Stellar testnet MVP for decentralized payroll and streaming payments. It extends the existing OrbitPay dApp with an OBT mint faucet, a new Soroban payroll contract, payroll admin and recipient dashboards, and architecture documentation for the Blue Belt Level 5 challenge.
 
-🚀 **Live Demo:** [https://orbit-pay-seven.vercel.app/](https://orbit-pay-seven.vercel.app/)
+## Live Demo
 
+Live demo placeholder: `https://your-orbitpay-pro-demo.example`
 
----
+Demo video placeholder: `https://your-demo-video-link.example`
 
-## ✨ Features (Level 3 Upgrade)
+## Level 5 Checklist
+
+| Requirement | Status |
+|---|---|
+| Public GitHub repository | Ready |
+| Working MVP | Ready after PayrollContract testnet deployment |
+| 10+ meaningful commits | Prepared in this branch |
+| Architecture document | `ARCHITECTURE.md` |
+| 5+ testnet users | Placeholder below |
+| Feedback documentation | Placeholder below |
+| One feedback-driven iteration | Placeholder below |
+
+## Features
 
 | Feature | Description |
 |---|---|
-| 🔗 **Multi-Wallet Connect** | Freighter, xBull, Albedo, and Hana via Stellar Wallets Kit v2 |
-| 🪙 **Custom Token (OBT)** | **Green Belt:** Mint, transfer, and track a custom Soroban token |
-| 🏗️ **CI/CD Pipeline** | **Green Belt:** Automated Vitest suite on every push via GitHub Actions |
-| 📱 **Mobile First** | **Green Belt:** Fully fluid responsive UI from 375px up |
-| 📊 **Community Poll** | Vote on-chain using a deployed Soroban smart contract |
-| 💸 **Send XLM & OBT** | Built-in asset selector for native and custom asset transfers |
-| ⏳ **Loading States** | Sophisticated progress indicators for all async operations |
-| 💾 **Basic Caching** | Persistence of multiple asset balances and transactions |
-| 🧪 **Automated Testing** | 6+ Unit tests covering logic, error handling, and UI components |
+| Multi-wallet connect | Freighter, xBull, Albedo, and Hana via StellarWalletsKit |
+| OBT token faucet | Dashboard button mints 1,000 OBT to the connected wallet |
+| OBT transfers | Send and track custom OrbitToken payments |
+| Payroll streams | Admin creates recipient, amount, token, and duration-based streams |
+| Recipient claims | Recipient sees claimable balance and claims streamed pay |
+| Admin controls | Pause, resume, and cancel stream controls |
+| On-chain poll | Existing Soroban voting flow with inter-contract OBT balance check |
+| CI and tests | Vitest suite covering utilities, UI, contracts, token, faucet, and payroll |
 
+## Testnet Users
 
----
+Replace these placeholders with real wallet addresses from your 5+ testnet users:
 
-## 📜 Deployed Contract & Checklist
-
-| | |
+| User | Wallet Address |
 |---|---|
-| **Poll Contract ID** | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
-| **OBT Token ID** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
-| **Network** | Stellar Testnet |
-| **Inter-contract Call** | `PollContract` calls `OrbitToken` to verify balance before voting |
-| **Demo Video** | [Watch Green Belt Demo](https://www.youtube.com/watch?v=buPVz4kdLBg) |
+| User 1 | `G...` |
+| User 2 | `G...` |
+| User 3 | `G...` |
+| User 4 | `G...` |
+| User 5 | `G...` |
 
+## Feedback
 
+Google Form placeholder: `https://forms.gle/your-form`
 
----
+Exported feedback sheet placeholder: `https://docs.google.com/spreadsheets/d/your-sheet`
 
-## 🧪 Testing (3+ Tests Passing)
+## Feedback-Driven Improvements
 
-We use **Vitest** for unit and component testing.
+Add one completed iteration after user feedback. Include commit links when the commits are pushed:
 
-| Test Mode | Description | Status |
+| Feedback | Improvement | Commit |
 |---|---|---|
-| **Contract Logic** | Mocked simulation calls with RPC response handling | ✅ Passed |
-| **Error Handling** | Validating fallback behavior and invalid input handling | ✅ Passed |
-| **UI Component** | Testing toast notification rendering in JSDOM environment | ✅ Passed |
+| Placeholder: users wanted clearer claim state | Disabled claim button when claimable balance is 0 | `https://github.com/<owner>/<repo>/commit/<sha>` |
+| Placeholder: users wanted easier test tokens | Added 1,000 OBT mint faucet | `https://github.com/<owner>/<repo>/commit/<sha>` |
 
-```bash
-# Run the test suite
-npm run test
-```
+## Contracts and Transactions
 
----
+| Item | Value |
+|---|---|
+| Network | Stellar Testnet |
+| Poll Contract ID | `CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC` |
+| OBT Token Contract ID | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN3` |
+| Payroll Contract ID | `PAYROLL_CONTRACT_ID_PENDING_DEPLOYMENT` |
+| OBT Faucet Mint Tx | `PASTE_TX_HASH_AFTER_MINT` |
+| Payroll Contract Deploy Tx | `PASTE_DEPLOY_TX_HASH` |
+| Payroll Stream Create Tx | `PASTE_CREATE_STREAM_TX_HASH` |
+| Payroll Claim Tx | `PASTE_CLAIM_TX_HASH` |
 
-## 📁 Project Structure
+## Setup
 
-```
-stellar-payment-dapp/
-├── index.html              # Main UI with sidebar layout
-├── style.css               # Design system with L3 Loaders & Shimmers
-├── app.js                  # Main orchestrator (Caching & Loading logic)
-├── tests/                  # Level 3 Test Suite (Vitest)
-│   ├── utils.test.js       # Logic and error handling
-│   ├── ui.test.js          # DOM/UI Component tests
-│   └── contract.test.js    # Mocked contract interaction tests
-├── js/
-│   ├── wallet.js           # Wallets Kit wrapper
-│   ├── contract.js         # Soroban contract interaction
-│   └── toast.js            # Notification system
-├── package.json            # Dependencies and scripts (L3 Ready)
-└── README.md
-```
-
----
-
-## 🚀 Setup & Run
-
-### 1. Install Dependencies
 ```bash
 npm install
-```
-
-### 2. Run Tests
-```bash
 npm run test
-```
-
-### 3. Start Development
-```bash
 npm run dev
 ```
 
----
+## Build
 
-## 📸 Screenshots
+```bash
+npm run build
+```
 
-### Landing Page & Initialization Sequence
-<p align="center">
-  <img src="./assets/landing.png" alt="OrbitPay Landing Page Overlay" width="800" style="border-radius: 8px;"/>
-</p>
+## Soroban Contract Deployment
 
-### Authenticated Dashboard
-<p align="center">
-  <img src="./assets/dashboard.png" alt="Stellar Wallet Dashboard" width="800" style="border-radius: 8px;"/>
-</p>
+Install and configure the Stellar CLI, then build the contracts:
 
-### On-Chain Soroban Poll
-<p align="center">
-  <img src="./assets/poll.png" alt="Community On-Chain Voting" width="800" style="border-radius: 8px;"/>
-</p>
+```bash
+cargo build --target wasm32-unknown-unknown --release
+```
 
-### 📱 Mobile Responsive View (Green Belt)
-<p align="center">
-  <img src="./assets/mobile_view.png" alt="Mobile Responsive UI (375px)" width="375" style="border-radius: 12px; border: 4px solid #1e1e2e;"/>
-</p>
+Deploy PayrollContract:
 
-### ✅ CI Pipeline Passing (Green Belt)
-<p align="center">
-  <img src="./assets/ci_passing.png" alt="CI/CD GitHub Actions Passing" width="800" style="border-radius: 8px;"/>
-</p>
+```bash
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/payroll_contract.wasm \
+  --source <ADMIN_IDENTITY> \
+  --network testnet
+```
 
+Initialize PayrollContract:
 
+```bash
+stellar contract invoke \
+  --id <PAYROLL_CONTRACT_ID> \
+  --source <ADMIN_IDENTITY> \
+  --network testnet \
+  -- initialize \
+  --admin <ADMIN_PUBLIC_KEY>
+```
 
+After deployment, update `PAYROLL_CONTRACT_ID` in `js/payroll.js`, then add the deployment address and transaction hashes above.
 
+## Project Structure
 
----
+```text
+OrbitPay/
+|-- app.js
+|-- index.html
+|-- style.css
+|-- ARCHITECTURE.md
+|-- js/
+|   |-- wallet.js
+|   |-- token.js
+|   |-- payroll.js
+|   |-- contract.js
+|   |-- toast.js
+|   `-- utils.js
+|-- contracts/
+|   |-- token/
+|   |-- poll/
+|   `-- payroll/
+`-- tests/
+    |-- utils.test.js
+    |-- ui.test.js
+    |-- token.test.js
+    |-- contract.test.js
+    `-- payroll.test.js
+```
 
-## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
+## Architecture
 
----
+See `ARCHITECTURE.md` for the system overview, contract interaction flow, frontend component tree, and PayrollContract to OBT TokenContract data flow.
 
-<p align="center">
-  Built with 💜 for the <strong>Stellar Green Belt Challenge</strong>
-</p>
+## Screenshots
 
+Existing OrbitPay screenshots are stored in `assets/`:
+
+| View | File |
+|---|---|
+| Landing | `assets/landing.png` |
+| Dashboard | `assets/dashboard.png` |
+| Poll | `assets/poll.png` |
+
+## License
+
+MIT
