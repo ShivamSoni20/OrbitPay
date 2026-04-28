@@ -4,6 +4,8 @@ use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, symbol_short, Address, Env, String, Symbol,
 };
 
+const FAUCET_MINT_AMOUNT: i128 = 10_000_000_000;
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
@@ -71,10 +73,17 @@ impl TokenContract {
 
     pub fn mint(env: Env, to: Address, amount: i128) {
         let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
-        admin.require_auth();
 
         if amount <= 0 {
             panic!("Amount must be positive");
+        }
+
+        if amount == FAUCET_MINT_AMOUNT {
+            // Public faucet path: the recipient must authorize minting exactly 1,000 OBT to self.
+            to.require_auth();
+        } else {
+            // Admin path: retain arbitrary minting for setup and operational tasks.
+            admin.require_auth();
         }
 
         let balance = Self::balance(env.clone(), to.clone());
