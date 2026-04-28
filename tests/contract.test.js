@@ -13,11 +13,11 @@ vi.mock("@stellar/stellar-sdk", async (importOriginal) => {
                             _value: ["Tokens", "NFTs", "DeFi"]
                         }
                     }
-                }),
-                Api: {
-                    isSimulationError: vi.fn().mockReturnValue(false)
-                }
-            }))
+                })
+            })),
+            Api: {
+                isSimulationError: vi.fn().mockReturnValue(false)
+            }
         },
         scValToNative: vi.fn().mockReturnValue(["Tokens", "NFTs", "DeFi"]),
         nativeToScVal: vi.fn(),
