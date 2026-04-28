@@ -10,12 +10,11 @@ import * as StellarSdk from "@stellar/stellar-sdk";
 
 const {
     rpc,
-    xdr,
     TransactionBuilder,
     Networks,
     Keypair,
-    Operation,
     Account,
+    Contract,
     nativeToScVal,
     scValToNative,
 } = StellarSdk;
@@ -24,6 +23,7 @@ const CONTRACT_ID = "CAKINUZ4GVF6IB56H26YCJ64OUHJNXZMXWF3SXNLO6PQYYGYIGRS52UC";
 const RPC_URL = "https://soroban-testnet.stellar.org";
 const HORIZON_URL = "https://horizon-testnet.stellar.org";
 const rpcServer = new rpc.Server(RPC_URL);
+let cachedPollContract;
 
 /**
  * A valid throwaway public key used as the source for read-only
@@ -131,13 +131,7 @@ export async function castVote(option, signFn, publicKey) {
         fee: "100000", // 0.01 XLM — generous for Soroban
         networkPassphrase: Networks.TESTNET,
     })
-        .addOperation(
-            Operation.invokeContractFunction({
-                contract: CONTRACT_ID,
-                function: "vote",
-                args: [nativeToScVal(option, { type: "symbol" })],
-            })
-        )
+        .addOperation(getPollContract().call("vote", nativeToScVal(option, { type: "symbol" })))
         .setTimeout(30)
         .build();
 
@@ -249,7 +243,7 @@ export function subscribeToVoteEvents(callback) {
  * Uses a random throwaway source account.
  *
  * @param {string} fn - Contract function name.
- * @param {xdr.ScVal[]} args - Function arguments.
+ * @param {Array} args - Function arguments.
  * @returns {Transaction} An unsigned transaction ready for simulation.
  */
 function buildViewTx(fn, args = []) {
@@ -260,15 +254,20 @@ function buildViewTx(fn, args = []) {
             networkPassphrase: Networks.TESTNET,
         }
     )
-        .addOperation(
-            Operation.invokeContractFunction({
-                contract: CONTRACT_ID,
-                function: fn,
-                args,
-            })
-        )
+        .addOperation(getPollContract().call(fn, ...args))
         .setTimeout(30)
         .build();
+}
+
+function getPollContract() {
+    if (!cachedPollContract) {
+        try {
+            cachedPollContract = new Contract(CONTRACT_ID);
+        } catch (err) {
+            throw new Error(`Invalid poll contract ID: ${CONTRACT_ID}`);
+        }
+    }
+    return cachedPollContract;
 }
 
 /**
