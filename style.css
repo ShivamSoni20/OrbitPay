@@ -156,6 +156,10 @@ a:hover { color: var(--secondary); }
     border-bottom: 1px solid var(--border);
 }
 
+.sidebar-brand > div {
+    min-width: 0;
+}
+
 .sidebar-brand .brand-icon {
     width: 42px; height: 42px;
     display: flex; align-items: center; justify-content: center;
@@ -195,6 +199,31 @@ a:hover { color: var(--secondary); }
     background: var(--accent-glow);
     color: var(--accent-light);
     letter-spacing: 0.5px;
+}
+
+.sidebar-close-btn {
+    margin-left: auto;
+    width: 36px;
+    height: 36px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--duration) var(--ease);
+}
+
+.sidebar-close-btn:hover {
+    border-color: var(--border-bright);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.sidebar-close-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
 .sidebar-nav {
@@ -312,6 +341,7 @@ a:hover { color: var(--secondary); }
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
 /* --- Network Badge --- */
@@ -379,12 +409,17 @@ a:hover { color: var(--secondary); }
     border: 1px solid var(--border);
     border-radius: 28px;
     backdrop-filter: blur(10px);
+    max-width: 100%;
 }
 
 .wallet-pill .wallet-addr {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     color: var(--text-secondary);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .wallet-pill .wallet-balance-badge {
@@ -394,6 +429,7 @@ a:hover { color: var(--secondary); }
     font-size: 13px;
     font-weight: 600;
     color: #fff;
+    flex-shrink: 0;
 }
 
 .wallet-pill .disconnect-btn {
@@ -1376,12 +1412,42 @@ a:hover { color: var(--secondary); }
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
+    .app-header {
+        height: auto;
+        min-height: var(--header-height);
+        padding: 12px 16px;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .header-left,
+    .header-right {
+        width: 100%;
+    }
+
+    .header-right {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .page-title {
+        font-size: 16px;
+    }
+
     .sidebar {
         transform: translateX(-100%);
+        width: min(78vw, 320px);
+        max-width: calc(100vw - 56px);
     }
 
     .sidebar.open {
         transform: translateX(0);
+    }
+
+    .sidebar-close-btn {
+        display: inline-flex;
     }
 
     .sidebar-overlay.open {
@@ -1410,8 +1476,39 @@ a:hover { color: var(--secondary); }
         grid-template-columns: 1fr;
     }
 
+    .stream-row,
+    .tx-item,
+    .card-header,
+    .poll-option .poll-content {
+        align-items: flex-start;
+    }
+
+    .stream-actions,
+    .card-header,
+    .poll-option .poll-content {
+        flex-wrap: wrap;
+    }
+
+    .tx-item {
+        flex-direction: column;
+    }
+
+    .tx-meta {
+        text-align: left;
+    }
+
+    .wallet-pill {
+        width: 100%;
+        justify-content: space-between;
+        padding-left: 12px;
+    }
+
     .wallet-pill .wallet-addr {
         display: none;
+    }
+
+    .wallet-pill .wallet-balance-badge {
+        margin-left: auto;
     }
 
     .toast {
@@ -1429,10 +1526,25 @@ a:hover { color: var(--secondary); }
         padding: 0 16px;
     }
 
+    .sidebar {
+        width: min(76vw, 280px);
+        max-width: calc(100vw - 48px);
+    }
+
     .network-badge span { display: none; }
 
     .connect-wallet-btn span { display: none; }
     .connect-wallet-btn { padding: 9px 14px; }
+
+    .wallet-pill {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+
+    .wallet-pill .wallet-balance-badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
 }
 
 /* ============================================

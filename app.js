@@ -117,7 +117,8 @@ function setupNavigation() {
     });
 
     $("mobile-menu-btn")?.addEventListener("click", toggleMobileMenu);
-    $("sidebar-overlay")?.addEventListener("click", toggleMobileMenu);
+    $("sidebar-overlay")?.addEventListener("click", closeMobileMenu);
+    $("sidebar-close-btn")?.addEventListener("click", closeMobileMenu);
 }
 
 function navigateTo(page) {
@@ -154,8 +155,7 @@ function navigateTo(page) {
     const titles = { dashboard: "Dashboard", send: "Send XLM", payroll: "Payroll", poll: "Community Poll", history: "Transaction History", settings: "Settings" };
     $("page-title").textContent = titles[page] || "Dashboard";
 
-    $("sidebar")?.classList.remove("open");
-    $("sidebar-overlay")?.classList.remove("open");
+    closeMobileMenu();
 
     // Page-specific initialization
     if (page === "poll") {
@@ -174,6 +174,11 @@ function navigateTo(page) {
 function toggleMobileMenu() {
     $("sidebar")?.classList.toggle("open");
     $("sidebar-overlay")?.classList.toggle("open");
+}
+
+function closeMobileMenu() {
+    $("sidebar")?.classList.remove("open");
+    $("sidebar-overlay")?.classList.remove("open");
 }
 
 function triggerAppReveal() {
@@ -203,8 +208,6 @@ function setupEventListeners() {
     $("claim-payroll-btn")?.addEventListener("click", handleClaimPayroll);
     $("copy-addr-btn")?.addEventListener("click", handleCopyAddress);
     $("qr-btn")?.addEventListener("click", () => showQRModal(state.userPublicKey));
-    $("mobile-menu-btn")?.addEventListener("click", toggleMobileMenu);
-    $("sidebar-overlay")?.addEventListener("click", toggleMobileMenu);
 
     // Asset selection
     const assets = document.getElementsByName("asset");
