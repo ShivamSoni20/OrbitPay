@@ -110,6 +110,11 @@
                 <span>Send XLM</span>
             </div>
 
+            <div class="nav-item" data-page="payroll">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10"/><path d="M7 13h6"/></svg>
+                <span>Payroll</span>
+            </div>
+
             <div class="nav-item" data-page="poll">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="4" height="16" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="16" y="2" width="4" height="18" rx="1"/></svg>
                 <span>Community Poll</span>
@@ -231,6 +236,10 @@
                             </div>
                             <div class="stat-value" id="dash-obt-balance">0.00</div>
                             <div class="stat-label">OrbitToken (OBT)</div>
+                            <button id="mint-obt-btn" class="btn-secondary stat-action" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                                <span>Mint 1,000 OBT</span>
+                            </button>
                         </div>
 
 
@@ -319,6 +328,88 @@
                             </button>
                         </form>
 
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAYROLL PAGE ===== -->
+            <div id="page-payroll" class="page-view">
+                <div class="payroll-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                Create Stream
+                            </h3>
+                            <span class="text-sm text-muted">Admin</span>
+                        </div>
+                        <div class="card-body">
+                            <form id="payroll-create-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="payroll-recipient">Recipient Address</label>
+                                    <input class="form-input" type="text" id="payroll-recipient" placeholder="G..." autocomplete="off" required />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="payroll-amount">Total Amount</label>
+                                    <input class="form-input" type="number" id="payroll-amount" placeholder="1000.00" step="0.0000001" min="0.0000001" required />
+                                </div>
+                                <div class="payroll-form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="payroll-token">Token</label>
+                                        <select class="form-input" id="payroll-token">
+                                            <option value="OBT">OBT</option>
+                                            <option value="XLM">XLM</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="payroll-duration">Duration (days)</label>
+                                        <input class="form-input" type="number" id="payroll-duration" placeholder="30" min="1" step="1" required />
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary" id="create-stream-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    <span>Create Stream</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M8 19V9"/><path d="M12 19V3"/><path d="M16 19v-7"/><path d="M20 19V7"/></svg>
+                                Recipient Claim
+                            </h3>
+                            <span class="text-sm text-muted">Streaming</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="payroll-claim-box" id="recipient-claim-summary"></div>
+                            <button class="btn-primary" id="claim-payroll-btn" type="button" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                                <span>Nothing to claim</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payroll-grid mt-16">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+                                Active Streams
+                            </h3>
+                        </div>
+                        <div class="card-body" id="admin-stream-list"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                Claim History
+                            </h3>
+                        </div>
+                        <div class="card-body" id="claim-history-list"></div>
                     </div>
                 </div>
             </div>
