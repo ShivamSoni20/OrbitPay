@@ -12,7 +12,17 @@ import { initWalletKit, connectWallet, disconnectWallet, signTransaction } from 
 import { showToast } from "./js/toast.js";
 import { truncateAddress, formatNumber, formatDate, copyToClipboard, showQRModal } from "./js/utils.js";
 import { getOptions, getAllVotes, castVote, subscribeToVoteEvents } from "./js/contract.js";
-import { getTokenBalance, transferToken, TOKEN_SYMBOL } from "./js/token.js";
+import { FAUCET_MINT_AMOUNT, getTokenBalance, mintToken, transferToken, TOKEN_SYMBOL } from "./js/token.js";
+import {
+    calculateLocalClaimable,
+    claimPayrollStream,
+    createPayrollStream,
+    getClaimButtonState,
+    loadLocalStreams,
+    saveLocalStreams,
+    updatePayrollStreamStatus,
+    validatePayrollStream,
+} from "./js/payroll.js";
 
 
 // --- Stellar SDK Destructuring ---
@@ -43,6 +53,7 @@ const state = {
     pollLoaded: false,
     votedOption: null,
     transactions: JSON.parse(localStorage.getItem(CACHE_KEYS.TXS) || "[]"),
+    payrollStreams: loadLocalStreams(),
     currentPage: "dashboard",
     lastPollUpdate: new Date(),
     unsubscribeEvents: null,
@@ -140,7 +151,7 @@ function navigateTo(page) {
         });
     }
 
-    const titles = { dashboard: "Dashboard", send: "Send XLM", poll: "Community Poll", history: "Transaction History", settings: "Settings" };
+    const titles = { dashboard: "Dashboard", send: "Send XLM", payroll: "Payroll", poll: "Community Poll", history: "Transaction History", settings: "Settings" };
     $("page-title").textContent = titles[page] || "Dashboard";
 
     $("sidebar")?.classList.remove("open");
@@ -156,6 +167,7 @@ function navigateTo(page) {
     }
 
     if (page === "history" && state.userPublicKey) fetchTransactions();
+    if (page === "payroll") renderPayroll();
 }
 
 
@@ -186,6 +198,9 @@ function setupEventListeners() {
     $("connect-btn")?.addEventListener("click", () => handleConnect("connect-btn"));
     $("disconnect-btn")?.addEventListener("click", handleDisconnect);
     $("payment-form")?.addEventListener("submit", handlePayment);
+    $("mint-obt-btn")?.addEventListener("click", handleMintOBT);
+    $("payroll-create-form")?.addEventListener("submit", handleCreatePayrollStream);
+    $("claim-payroll-btn")?.addEventListener("click", handleClaimPayroll);
     $("copy-addr-btn")?.addEventListener("click", handleCopyAddress);
     $("qr-btn")?.addEventListener("click", () => showQRModal(state.userPublicKey));
     $("mobile-menu-btn")?.addEventListener("click", toggleMobileMenu);
@@ -200,6 +215,140 @@ function setupEventListeners() {
         });
     });
 }
+
+async function handleMintOBT() {
+    if (!state.userPublicKey) {
+        showToast("Please connect your wallet before minting OBT", "warning");
+        return;
+    }
+
+    const btn = $("mint-obt-btn");
+    setActionButtonState(btn, true, "Minting...");
+
+    try {
+        const txHash = await mintToken(state.userPublicKey, FAUCET_MINT_AMOUNT, signTransaction);
+        showToast(
+            `Minted ${FAUCET_MINT_AMOUNT} ${TOKEN_SYMBOL}. <a href="https://stellar.expert/explorer/testnet/tx/${txHash}" target="_blank" style="color:#818cf8; text-decoration: underline;">View transaction</a>`,
+            "success",
+            7000
+        );
+        await syncAccountData();
+        addLocalTx(txHash, `Minted ${FAUCET_MINT_AMOUNT} ${TOKEN_SYMBOL}`, "mint", FAUCET_MINT_AMOUNT, TOKEN_SYMBOL);
+    } catch (err) {
+        console.error("OBT mint error:", err);
+        const message = err?.message || "OBT mint failed.";
+        if (message.toLowerCase().includes("user")) {
+            showToast("Mint rejected in wallet", "error");
+        } else {
+            showToast(message, "error");
+        }
+    } finally {
+        setActionButtonState(btn, false);
+    }
+}
+
+async function handleCreatePayrollStream(e) {
+    e.preventDefault();
+    if (!state.userPublicKey) {
+        showToast("Connect your wallet to create a payroll stream", "warning");
+        return;
+    }
+
+    const form = {
+        recipient: $("payroll-recipient")?.value.trim(),
+        amount: $("payroll-amount")?.value.trim(),
+        tokenType: $("payroll-token")?.value || "OBT",
+        durationDays: $("payroll-duration")?.value.trim(),
+    };
+    const validation = validatePayrollStream(form);
+    if (!validation.valid) {
+        showToast(Object.values(validation.errors)[0], "error");
+        return;
+    }
+
+    const btn = $("create-stream-btn");
+    setActionButtonState(btn, true, "Creating...");
+
+    try {
+        const stream = await createPayrollStream(state.userPublicKey, form, signTransaction);
+        state.payrollStreams = [stream, ...state.payrollStreams];
+        saveLocalStreams(state.payrollStreams);
+        $("payroll-create-form").reset();
+        renderPayroll();
+        showToast(
+            `Payroll stream created. <a href="https://stellar.expert/explorer/testnet/tx/${stream.txHash}" target="_blank" style="color:#818cf8; text-decoration: underline;">View transaction</a>`,
+            "success",
+            7000
+        );
+    } catch (err) {
+        console.error("Create payroll stream error:", err);
+        showToast(err?.message || "Could not create payroll stream", "error");
+    } finally {
+        setActionButtonState(btn, false);
+        renderPayroll();
+    }
+}
+
+async function handleClaimPayroll() {
+    const stream = getRecipientStreams()[0];
+    if (!stream) {
+        showToast("No payroll stream found for this wallet", "warning");
+        return;
+    }
+
+    const claimable = calculateLocalClaimable(stream);
+    if (claimable <= 0) {
+        renderPayroll();
+        showToast("No streamed balance is claimable yet", "info");
+        return;
+    }
+
+    const btn = $("claim-payroll-btn");
+    setActionButtonState(btn, true, "Claiming...");
+    try {
+        const txHash = await claimPayrollStream(state.userPublicKey, stream, signTransaction);
+        stream.claimed = (stream.claimed || 0) + claimable;
+        stream.history = [{ amount: claimable, txHash, date: new Date().toISOString() }, ...(stream.history || [])];
+        saveLocalStreams(state.payrollStreams);
+        renderPayroll();
+        showToast(
+            `Claimed ${formatNumber(claimable, 4)} ${stream.tokenType}. <a href="https://stellar.expert/explorer/testnet/tx/${txHash}" target="_blank" style="color:#818cf8; text-decoration: underline;">View transaction</a>`,
+            "success",
+            7000
+        );
+    } catch (err) {
+        console.error("Claim payroll error:", err);
+        showToast(err?.message || "Could not claim payroll", "error");
+    } finally {
+        setActionButtonState(btn, false);
+    }
+}
+
+window._payrollAction = async (streamId, action) => {
+    const stream = state.payrollStreams.find((item) => item.id === Number(streamId));
+    if (!stream || !state.userPublicKey) return;
+    if (stream.admin !== state.userPublicKey) {
+        showToast("Only the stream admin can manage this payroll stream", "error");
+        return;
+    }
+
+    try {
+        const txHash = await updatePayrollStreamStatus(state.userPublicKey, stream, action, signTransaction);
+        const next = { pause: "Paused", resume: "Active", cancel: "Cancelled" }[action];
+        stream.status = next;
+        stream.history = [{ action, txHash, date: new Date().toISOString() }, ...(stream.history || [])];
+        saveLocalStreams(state.payrollStreams);
+        renderPayroll();
+        showToast(
+            `Stream ${next.toLowerCase()}. <a href="https://stellar.expert/explorer/testnet/tx/${txHash}" target="_blank" style="color:#818cf8; text-decoration: underline;">View transaction</a>`,
+            "success",
+            7000
+        );
+    } catch (err) {
+        console.error("Payroll admin action error:", err);
+        showToast(err?.message || `Could not ${action} stream`, "error");
+    }
+};
 
 
 
@@ -227,6 +376,7 @@ function updateUI() {
 
     const totalVotes = state.pollData.reduce((a, b) => a + b.votes, 0);
     $("dash-total-votes").textContent = totalVotes;
+    renderPayroll();
 }
 
 function updateAssetUI() {
@@ -388,7 +538,7 @@ async function handlePayment(e) {
 
         $("payment-form").reset();
         await syncAccountData();
-        addLocalTx(hash, isOBT ? `Sent ${amount} OBT` : `Sent ${amount} XLM`, "sent", amount);
+        addLocalTx(hash, isOBT ? `Sent ${amount} OBT` : `Sent ${amount} XLM`, "sent", amount, isOBT ? "OBT" : "XLM");
     } catch (err) {
         console.error("Payment error:", err);
         showToast(err.message || "Payment failed", "error");
@@ -407,6 +557,92 @@ function setBtnState(btn, loading, text = "") {
         btn.innerHTML = `<div class="loading" style="display:flex;align-items:center;gap:8px"><div class="loader" style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>${text}</div>`;
     } else {
         btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Send ${isOBT ? 'OBT' : 'XLM'}</span>`;
+    }
+}
+
+function getAdminStreams() {
+    if (!state.userPublicKey) return [];
+    return state.payrollStreams.filter((stream) => stream.admin === state.userPublicKey);
+}
+
+function getRecipientStreams() {
+    if (!state.userPublicKey) return [];
+    return state.payrollStreams.filter((stream) => stream.recipient === state.userPublicKey);
+}
+
+function renderPayroll() {
+    const adminList = $("admin-stream-list");
+    const recipientSummary = $("recipient-claim-summary");
+    const historyList = $("claim-history-list");
+    if (!adminList && !recipientSummary && !historyList) return;
+
+    const adminStreams = getAdminStreams();
+    if (adminList) {
+        adminList.innerHTML = adminStreams.length ? adminStreams.map(renderAdminStream).join("") : `<div class="empty-state"><p>No active payroll streams yet</p></div>`;
+    }
+
+    const recipientStreams = getRecipientStreams();
+    const primaryStream = recipientStreams[0];
+    const claimable = primaryStream ? calculateLocalClaimable(primaryStream) : 0;
+    const claimState = getClaimButtonState(claimable);
+
+    if (recipientSummary) {
+        recipientSummary.innerHTML = `
+            <div>
+                <span class="payroll-metric-label">Claimable now</span>
+                <strong>${formatNumber(claimable, 4)} ${primaryStream?.tokenType || "OBT"}</strong>
+            </div>
+            <span class="status-pill ${primaryStream?.status?.toLowerCase() || "paused"}">${primaryStream?.status || "No stream"}</span>
+        `;
+    }
+
+    const claimBtn = $("claim-payroll-btn");
+    if (claimBtn) {
+        claimBtn.disabled = claimState.disabled;
+        claimBtn.querySelector("span").textContent = claimState.label;
+    }
+
+    if (historyList) {
+        const history = recipientStreams.flatMap((stream) => stream.history || []);
+        historyList.innerHTML = history.length ? history.map((item) => `
+            <li class="tx-item">
+                <div class="tx-details">
+                    <div class="tx-type">${item.amount ? `Claimed ${formatNumber(item.amount, 4)}` : item.action}</div>
+                    <div class="tx-addr">${formatDate(item.date)}</div>
+                </div>
+                <a class="tx-link" href="https://stellar.expert/explorer/testnet/tx/${item.txHash}" target="_blank">Explorer</a>
+            </li>
+        `).join("") : `<div class="empty-state"><p>No payroll claims yet</p></div>`;
+    }
+}
+
+function renderAdminStream(stream) {
+    return `
+        <div class="stream-row">
+            <div class="stream-main">
+                <strong>${formatNumber(stream.amount, 4)} ${stream.tokenType}</strong>
+                <span class="mono">${truncateAddress(stream.recipient, 6, 6)}</span>
+            </div>
+            <span class="status-pill ${stream.status.toLowerCase()}">${stream.status}</span>
+            <div class="stream-actions">
+                <button class="icon-btn" title="Pause stream" onclick="window._payrollAction(${stream.id}, 'pause')" ${stream.status !== "Active" ? "disabled" : ""}>II</button>
+                <button class="icon-btn" title="Resume stream" onclick="window._payrollAction(${stream.id}, 'resume')" ${stream.status !== "Paused" ? "disabled" : ""}>></button>
+                <button class="icon-btn" title="Cancel stream" onclick="window._payrollAction(${stream.id}, 'cancel')" ${stream.status === "Cancelled" ? "disabled" : ""}>x</button>
+            </div>
+        </div>
+    `;
+}
+
+function setActionButtonState(btn, loading, text = "") {
+    if (!btn) return;
+    const defaultText = btn.dataset.defaultText || btn.textContent.trim();
+    btn.dataset.defaultText = defaultText;
+    btn.disabled = loading;
+    btn.classList.toggle("btn-loading", loading);
+    if (loading && text) {
+        btn.querySelector("span") ? btn.querySelector("span").textContent = text : btn.textContent = text;
+    } else {
+        btn.querySelector("span") ? btn.querySelector("span").textContent = defaultText : btn.textContent = defaultText;
     }
 }
 
@@ -607,6 +843,21 @@ function renderDashboardTx() {
     el.innerHTML = `<ul class="tx-list">${recent.map(renderTxItem).join("")}</ul>`;
 }
 
+function addLocalTx(hash, type, direction = "sent", amount = "0", asset = "XLM") {
+    const tx = {
+        hash,
+        type,
+        amount,
+        asset,
+        counterparty: state.userPublicKey,
+        date: new Date().toISOString(),
+        isSent: direction === "sent",
+    };
+    state.transactions = [tx, ...state.transactions].slice(0, 10);
+    localStorage.setItem(CACHE_KEYS.TXS, JSON.stringify(state.transactions));
+    renderDashboardTx();
+}
+
 function renderTxItem(tx) {
     const arrowUp = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
     const arrowDown = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`;
@@ -619,7 +870,7 @@ function renderTxItem(tx) {
                 <div class="tx-addr">${truncateAddress(tx.counterparty, 8, 8)}</div>
             </div>
             <div class="tx-meta">
-                <div class="tx-amount ${tx.isSent ? "sent" : "received"}">${tx.isSent ? "-" : "+"}${formatNumber(tx.amount, 4)} XLM</div>
+                <div class="tx-amount ${tx.isSent ? "sent" : "received"}">${tx.isSent ? "-" : "+"}${formatNumber(tx.amount, 4)} ${tx.asset || "XLM"}</div>
                 <div class="tx-date">${formatDate(tx.date)}</div>
                 <a class="tx-link" href="https://stellar.expert/explorer/testnet/tx/${tx.hash}" target="_blank">Explorer ↗</a>
             </div>
